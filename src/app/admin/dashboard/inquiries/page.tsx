@@ -111,7 +111,7 @@ export default function InquiriesPage() {
                                             {inquiry.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">₱{inquiry.total.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₱{inquiry.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

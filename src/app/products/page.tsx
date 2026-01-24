@@ -129,8 +129,8 @@ export default function ProductsPage() {
                   className="mt-4"
                 />
                 <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                  <span>₱{priceRange[0].toLocaleString()}</span>
-                  <span>₱{priceRange[1].toLocaleString()}</span>
+                  <span>₱{priceRange[0].toLocaleString('en-US')}</span>
+                  <span>₱{priceRange[1].toLocaleString('en-US')}</span>
                 </div>
               </div>
             </div>

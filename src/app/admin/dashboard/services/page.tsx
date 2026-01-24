@@ -61,7 +61,7 @@ export default function ServicesPage() {
                                 <TableRow key={service.id}>
                                     <TableCell className="font-medium">{service.name}</TableCell>
                                     <TableCell>{service.description.substring(0, 100)}...</TableCell>
-                                    <TableCell className="text-right">₱{service.price.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₱{service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
