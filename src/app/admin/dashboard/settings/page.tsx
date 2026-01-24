@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser, setDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole } from "@/lib/types";
 import {
@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { setDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 
 
 export default function SettingsPage() {
@@ -86,34 +85,35 @@ export default function SettingsPage() {
         }
     };
     
-    const handleAddUser = async () => {
+    const handleAddUser = () => {
         if (!newUser.name || !newUser.email) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please enter name and email.' });
             return;
         }
 
-        try {
-            const newUserId = `user_${Date.now()}`;
-            // When adding a user via this form, we explicitly set the `id` field to be the same as `uid` for consistency
-            // since `useCollection` adds the document ID as `id` on the returned object.
-            await addDocumentNonBlocking(collection(firestore, 'users'), { ...newUser, uid: newUserId, id: newUserId });
+        // Create a new document reference with an auto-generated ID from the client
+        const newUserRef = doc(collection(firestore, "users"));
+        
+        // Use this new ID as the `uid` for the user profile data.
+        const newUserId = newUserRef.id;
 
-            toast({ title: 'User Added', description: `${newUser.name} has been added.` });
-            setNewUser({ name: '', email: '' });
-            setAddUserDialogOpen(false);
-            
-        } catch (error) {
-            console.error("Error adding user:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not add user.' });
-        }
+        // Use setDocumentNonBlocking to create the document with the specific ID.
+        // This is a "fire-and-forget" operation. Errors are handled globally by the error-emitter.
+        setDocumentNonBlocking(newUserRef, { ...newUser, uid: newUserId }, {});
+
+        toast({ title: 'User Added', description: `${newUser.name} has been added.` });
+        setNewUser({ name: '', email: '' });
+        setAddUserDialogOpen(false);
     };
     
     const handleDeleteUser = (userToDelete: UserProfile) => {
-        if (!userToDelete.id) return;
+        if (!userToDelete.id || !userToDelete.uid) return;
+        
         const userRef = doc(firestore, 'users', userToDelete.id);
         deleteDocumentNonBlocking(userRef);
         
-        if(userToDelete.uid && adminRoleIds.includes(userToDelete.uid)) {
+        // Also delete the admin role if it exists
+        if(adminRoleIds.includes(userToDelete.uid)) {
             const roleRef = doc(firestore, 'roles_admin', userToDelete.uid);
             deleteDocumentNonBlocking(roleRef);
         }
@@ -221,7 +221,7 @@ export default function SettingsPage() {
                                             <TableRow key={user.id}>
                                                 <TableCell className="font-medium">{user.name}</TableCell>
                                                 <TableCell>{user.email}</TableCell>
-                                                <TableCell>{adminRoleIds.includes(user.uid) ? "Administrator" : "User"}</TableCell>
+                                                <TableCell>{user.uid && adminRoleIds.includes(user.uid) ? "Administrator" : "User"}</TableCell>
                                                 <TableCell className="text-right">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                             <DropdownMenuItem onClick={() => handleToggleAdmin(user)}>
-                                                                {adminRoleIds.includes(user.uid) ? (
+                                                                {user.uid && adminRoleIds.includes(user.uid) ? (
                                                                     <><ShieldOff className="mr-2 h-4 w-4" />Remove Admin</>
                                                                 ) : (
                                                                     <><Shield className="mr-2 h-4 w-4" />Make Admin</>
