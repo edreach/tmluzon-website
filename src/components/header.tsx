@@ -22,14 +22,14 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900 text-slate-50">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container relative flex h-16 items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {navLinks.map((link) => (
             <Link
               key={link.label}
