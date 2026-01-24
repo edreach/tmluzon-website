@@ -1,0 +1,184 @@
+/**
+ * This ruleset enforces a hybrid security model for an e-commerce application.
+ *
+ * Core Philosophy:
+ * The security model combines strict user-ownership for personal data with role-based access control (RBAC)
+ * for administrative functions. Standard users have complete control over their own data (reviews, cart, orders)
+ * and cannot access the data of other users. Administrative users have elevated privileges to manage global
+ * data like products and application settings.
+ *
+ * Data Structure:
+ * - User-specific data is hierarchically organized under `/users/{userId}`. This path-based ownership is
+ *   the primary mechanism for securing reviews, cart items, and orders.
+ * - Global data, such as `/products`, is stored in top-level collections.
+ * - Admin roles are managed in a dedicated `/roles_admin` collection. The existence of a document
+ *   `/roles_admin/{userId}` grants that user administrative privileges.
+ * - A specific path, `/admin/dashboard/settings/tmluzon`, is used for a single settings document,
+ *   accessible only by admins.
+ *
+ * Key Security Decisions:
+ * - Default Deny: All paths are closed by default, and access is explicitly granted.
+ * - User Data Isolation: Users can only read and write data within their own `/users/{userId}` document tree.
+ *   Listing other users' documents is strictly forbidden to prevent user enumeration.
+ * - Admin Privilege Check: A fast `exists()` check against the `/roles_admin` collection is used to determine
+ *   if a user is an admin, granting them access to manage products and settings.
+ * - Public Read, Admin Write: The `/products` collection is publicly readable by anyone (including anonymous users)
+ *   to allow browsing, but all write operations are restricted to administrators.
+ * - Locked Collections: The `/orders_items` collection is currently locked down (`allow read, write: if false;`)
+ *   because its top-level structure prevents securely associating an order item with its owner without performing
+ *   a costly and discouraged `get()` call in the rules. It should be nested under orders for secure access.
+ *
+ * Denormalization for Authorization:
+ * - Admin roles are denormalized into the `/roles_admin/{userId}` collection. This allows for a simple and
+ *   performant `exists()` check to verify admin status without needing to read a user's profile document.
+ * - For user-owned subcollections (e.g., cart_items, orders), a `customerId` field is required on each document.
+ *   Rules enforce that this field matches the `{userId}` from the path on creation and is immutable on update,
+ *   ensuring relational integrity between the document's data and its path-based ownership.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions for authentication and authorization
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Checks if the requesting user is an admin by looking for their UID in the roles_admin collection.
+    // This is a fast and secure way to implement role-based access.
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    // Checks if a document being operated on already exists.
+    // Crucial for safe update and delete operations.
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    // Combines ownership and existence checks for concise update/delete rules.
+    function isExistingOwner(userId) {
+      return isOwner(userId) && isExistingDoc();
+    }
+    
+    /**
+     * @description Publicly readable product catalog. Writes are restricted to admins.
+     * @path /products/{productId}
+     * @allow (get) Any user, signed in or not, can read a product's details.
+     * @deny (create) A non-admin user cannot create a new product.
+     * @principle Implements a "Public Read with Admin-Only Writes" pattern for global data.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description A user's own root document.
+     * @path /users/{customerId}
+     * @allow (create) A new user can create their own user document if their UID matches the document ID.
+     * @deny (get) A user cannot read another user's document.
+     * @principle Enforces self-creation and ownership for a user's root document. Disallows listing to prevent user enumeration.
+     */
+    match /users/{customerId} {
+      allow get: if isOwner(customerId);
+      allow list: if false;
+      allow create: if isOwner(customerId) && request.resource.data.id == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(customerId);
+    }
+    
+    /**
+     * @description A user's private collection of product reviews.
+     * @path /users/{customerId}/customer_reviews/{customerReviewId}
+     * @allow (create) A user can create a review under their own ID.
+     * @deny (list) A user cannot list reviews belonging to another user.
+     * @principle Restricts access to a user's own data tree using path-based ownership.
+     */
+    match /users/{customerId}/customer_reviews/{customerReviewId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId) && request.resource.data.customerId == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.customerId == resource.data.customerId;
+      allow delete: if isExistingOwner(customerId);
+    }
+
+    /**
+     * @description A user's private shopping cart.
+     * @path /users/{customerId}/cart_items/{cartItemId}
+     * @allow (create, update, delete) A user can manage items in their own cart.
+     * @deny (get) A user cannot read another user's cart items.
+     * @principle Restricts access to a user's own data tree using path-based ownership.
+     */
+    match /users/{customerId}/cart_items/{cartItemId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId) && request.resource.data.customerId == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.customerId == resource.data.customerId;
+      allow delete: if isExistingOwner(customerId);
+    }
+    
+    /**
+     * @description A user's private collection of orders.
+     * @path /users/{customerId}/orders/{orderId}
+     * @allow (list) A user can list their own past orders.
+     * @deny (get) A user cannot read a specific order belonging to another user.
+     * @principle Restricts access to a user's own data tree using path-based ownership.
+     */
+    match /users/{customerId}/orders/{orderId} {
+      allow get, list: if isOwner(customerId);
+      allow create: if isOwner(customerId) && request.resource.data.customerId == customerId;
+      allow update: if isExistingOwner(customerId) && request.resource.data.customerId == resource.data.customerId;
+      allow delete: if isExistingOwner(customerId);
+    }
+
+    /**
+     * @description Stores individual items within an order.
+     * @path /orders_items/{orderItemId}
+     * @allow (none) No operations are currently allowed.
+     * @deny (get, list, create, update, delete) All operations are denied for security reasons.
+     * @principle CRITICAL: This collection is locked because its top-level structure makes it impossible to securely link an order item to its owner without slow, costly `get` calls, which are discouraged. For secure access, this data should be in a subcollection: `/users/{userId}/orders/{orderId}/order_items/{orderItemId}`.
+     */
+    match /orders_items/{orderItemId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Collection that defines who has admin privileges.
+     * @path /roles_admin/{userId}
+     * @allow (create) An existing admin can grant admin rights to another user.
+     * @deny (get, list) No one can read or list the admins to prevent user enumeration.
+     * @principle Access to this collection is restricted to existing admins, creating a secure way to manage roles.
+     */
+    match /roles_admin/{userId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+    
+    /**
+     * @description A single document containing global application settings.
+     * @path /admin/dashboard/settings/tmluzon
+     * @allow (read, write) An admin can read and modify the application settings.
+     * @deny (read, write) A regular user has no access to this document.
+     * @principle Secures a critical configuration document by restricting all access to admin users.
+     */
+    match /admin/dashboard/settings/tmluzon {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if isAdmin() && isExistingDoc();
+    }
+  }
+}

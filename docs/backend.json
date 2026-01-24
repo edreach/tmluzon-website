@@ -1,0 +1,351 @@
+{
+  "entities": {
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product listed on the TMLUZON website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the product, potentially augmented by AI."
+        },
+        "specifications": {
+          "type": "string",
+          "description": "Technical specifications of the product (materials, dimensions, etc.)."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the high-resolution image showcasing the product.",
+          "format": "uri"
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the product."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category the product belongs to."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "specifications",
+        "imageUrl",
+        "price",
+        "category"
+      ]
+    },
+    "CustomerReview": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CustomerReview",
+      "type": "object",
+      "description": "Represents a customer review for a product.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the customer review."
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N CustomerReview)"
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to Customer. (Relationship: Customer 1:N CustomerReview)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating given by the customer (e.g., 1-5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The customer's comments about the product."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date the review was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "productId",
+        "customerId",
+        "rating",
+        "comment",
+        "date"
+      ]
+    },
+    "Customer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Customer",
+      "type": "object",
+      "description": "Represents a customer who has provided a review.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the customer."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the customer."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the customer.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "CartItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CartItem",
+      "type": "object",
+      "description": "Represents an item added to the shopping cart.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the cart item."
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N CartItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the product in the cart."
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to Customer. (Relationship: Customer 1:N CartItem)"
+        }
+      },
+      "required": [
+        "id",
+        "productId",
+        "quantity",
+        "customerId"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a customer.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to Customer. (Relationship: Customer 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "The date the order was placed.",
+          "format": "date-time"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The total amount of the order."
+        },
+        "orderItems": {
+          "type": "array",
+          "description": "A list of order item IDs associated with the order.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "customerId",
+        "orderDate",
+        "totalAmount",
+        "orderItems"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents an item in an order.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order item."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the product in the order item."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the product in the order item."
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "productId",
+        "quantity",
+        "price"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information. Only admins can create, update, or delete products.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{customerId}/customer_reviews/{customerReviewId}",
+        "definition": {
+          "entityName": "CustomerReview",
+          "schema": {
+            "$ref": "#/backend/entities/CustomerReview"
+          },
+          "description": "Stores customer reviews for products. Each review is associated with a customer via path-based ownership.",
+          "params": [
+            {
+              "name": "customerId",
+              "description": "The unique identifier for the customer who wrote the review."
+            },
+            {
+              "name": "customerReviewId",
+              "description": "The unique identifier for the customer review."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{customerId}/cart_items/{cartItemId}",
+        "definition": {
+          "entityName": "CartItem",
+          "schema": {
+            "$ref": "#/backend/entities/CartItem"
+          },
+          "description": "Stores items added to the customer's shopping cart.  Uses path-based ownership.",
+          "params": [
+            {
+              "name": "customerId",
+              "description": "The unique identifier for the customer who owns the cart."
+            },
+            {
+              "name": "cartItemId",
+              "description": "The unique identifier for the cart item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{customerId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores orders placed by customers.  Uses path-based ownership.",
+          "params": [
+            {
+              "name": "customerId",
+              "description": "The unique identifier for the customer who placed the order."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/orders_items/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores individual items within an order.",
+          "params": [
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "RoleAdmin",
+          "schema": {
+            "$ref": "#/backend/entities/Customer"
+          },
+          "description": "Documents in this collection indicate admin privileges. Existence determines access to admin-only functions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The user's unique ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admin/dashboard/settings/tmluzon",
+        "definition": {
+          "entityName": "settings",
+          "schema": {
+            "$ref": "#/backend/entities/Customer"
+          },
+          "description": "This document will contains settings for the TMLUZON application.",
+          "params": []
+        }
+      }
+    ],
+    "reasoning": "Based on the requirements, the data structure prioritizes a flat structure and path-based ownership for user-generated content (customer reviews, cart items, and orders) to ensure Authorization Independence. Product data is stored in a top-level collection accessible to all users but manageable only by admins.\n\nThe structure promotes Authorization Independence by avoiding `get()` calls in security rules. Customer reviews, cart items, and orders are stored under the `/users/{userId}` path, inherently associating them with the user. This allows direct enforcement of ownership rules based on the request's `auth.uid` without needing to fetch parent documents. For the admin dashboard, a single document is used to manage the application's settings. Since only admins should have access, a document `/roles_admin/{uid}` will determine read/write privileges.\n\nThe structure supports QAPs by:\n\n1.  **Products:** Secure `list` operations on products are possible because they are stored in a top-level collection, and admin privileges are checked via a separate `/roles_admin/{uid}` document.\n2.  **User-Specific Data:** `list` operations on customer reviews, cart items, and orders are secured by the path-based ownership `/users/{userId}`, ensuring users can only access their own data.\n3.  **Settings:** Only admin users have access to the settings."
+  }
+}
