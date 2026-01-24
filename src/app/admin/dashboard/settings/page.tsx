@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -26,7 +27,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from "@/firebase";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser, useStorage } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
 import {
@@ -42,10 +43,12 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
+import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 
 
 export default function SettingsPage() {
     const firestore = useFirestore();
+    const storage = useStorage();
     const { toast } = useToast();
     const { isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
@@ -58,7 +61,7 @@ export default function SettingsPage() {
 
     // Fetch site settings
     const settingsRef = useMemoFirebase(() => (firestore && !isAuthLoading) ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null, [firestore, isAuthLoading]);
-    const { data: siteSettings } = useDoc<SiteSettings>(settingsRef);
+    const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
 
     const usersQuery = useMemoFirebase(
         () => (firestore && !isAuthLoading) ? collection(firestore, 'users') : null, 
@@ -82,7 +85,7 @@ export default function SettingsPage() {
             deleteDocumentNonBlocking(roleRef);
             toast({ title: "Admin Removed", description: `${userToUpdate.name} is no longer an admin.` });
         } else {
-            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid }, {});
+            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid });
             toast({ title: "Admin Added", description: `${userToUpdate.name} is now an admin.` });
         }
     };
@@ -96,12 +99,12 @@ export default function SettingsPage() {
         if (!firestore) return;
 
         const usersCollection = collection(firestore, "users");
-        const newUserDocRef = doc(usersCollection); // Create a reference with a new ID
+        const newUserDocRef = doc(usersCollection);
         
         setDocumentNonBlocking(newUserDocRef, { 
             ...newUser, 
             uid: newUserDocRef.id 
-        }, {});
+        });
 
         toast({ title: 'User Added', description: `${newUser.name} has been added.` });
         setNewUser({ name: '', email: '' });
@@ -123,54 +126,50 @@ export default function SettingsPage() {
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setLogoFile(e.target.files[0]);
+        } else {
+            setLogoFile(null);
         }
     };
 
     const handleUploadLogo = () => {
-        if (!logoFile || !firestore) {
+        if (!logoFile || !storage || !firestore) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please select a file to upload.' });
             return;
         }
 
-        // Prevent storing huge files in Firestore
-        if (logoFile.size > 750 * 1024) { // Roughly 750KB file size limit for Base64 encoding
-             toast({ 
-                 variant: 'destructive', 
-                 title: 'File too large', 
-                 description: 'Please upload a logo smaller than 750KB.' 
-             });
-             return;
-        }
-        
         setIsUploading(true);
-        setUploadProgress(50); // Set to 50% to show progress
+        setUploadProgress(0);
 
-        const reader = new FileReader();
-        reader.readAsDataURL(logoFile);
+        const sRef = storageRef(storage, `logos/${Date.now()}-${logoFile.name}`);
+        const uploadTask = uploadBytesResumable(sRef, logoFile);
 
-        reader.onload = () => {
-            const base64Logo = reader.result as string;
-            const settingsDocRef = doc(firestore, 'admin/dashboard/settings/tmluzon');
-            setDocumentNonBlocking(settingsDocRef, { logoUrl: base64Logo }, { merge: true });
-            
-            setUploadProgress(100);
-            toast({ title: 'Logo Updated!', description: 'Your new site logo has been saved.' });
-            
-            // Reset state after upload
-            setIsUploading(false);
-            setLogoFile(null);
-            setTimeout(() => setUploadProgress(0), 1000); // Clear progress bar after a short delay
-        };
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                setUploadProgress(progress);
+            },
+            (error) => {
+                console.error("Upload failed:", error);
+                toast({ variant: 'destructive', title: 'Upload Failed', description: "Please check storage rules in Firebase Console. " + error.message });
+                setIsUploading(false);
+                setUploadProgress(0);
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    const settingsDocRef = doc(firestore, 'admin/dashboard/settings/tmluzon');
+                    setDocumentNonBlocking(settingsDocRef, { logoUrl: downloadURL }, { merge: true });
 
-        reader.onerror = (error) => {
-            console.error("File reading failed:", error);
-            toast({ variant: 'destructive', title: 'Upload Failed', description: "Could not read the file." });
-            setIsUploading(false);
-            setUploadProgress(0);
-        };
+                    toast({ title: 'Logo Updated!', description: 'Your new site logo has been saved.' });
+                    
+                    setIsUploading(false);
+                    setLogoFile(null);
+                    setTimeout(() => setUploadProgress(0), 2000);
+                });
+            }
+        );
     };
 
-    const isLoading = isAuthLoading || isLoadingUsers || isLoadingAdminRoles;
+    const isLoading = isAuthLoading || isLoadingUsers || isLoadingAdminRoles || isLoadingSettings;
 
     return (
         <>
@@ -186,7 +185,8 @@ export default function SettingsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {siteSettings?.logoUrl && !isLoading && (
+                        {(isLoading) && <Skeleton className="h-16 w-40" />}
+                        {!isLoading && siteSettings?.logoUrl && (
                             <div>
                                 <Label>Current Logo</Label>
                                 <div className="mt-2 relative w-40 h-16 bg-muted rounded-md flex items-center justify-center border">
@@ -196,7 +196,7 @@ export default function SettingsPage() {
                         )}
                         <div className="flex items-center gap-4">
                             <Label htmlFor="logo-upload" className="sr-only">Upload logo</Label>
-                            <Input id="logo-upload" type="file" className="flex-1" onChange={handleFileSelect} disabled={isUploading} accept="image/png, image/jpeg, image/svg+xml" />
+                            <Input id="logo-upload" type="file" className="flex-1" onChange={handleFileSelect} disabled={isUploading} accept="image/*" />
                             <Button onClick={handleUploadLogo} disabled={isUploading || !logoFile}>
                                 {isUploading ? `Uploading...` : 'Upload'}
                             </Button>
