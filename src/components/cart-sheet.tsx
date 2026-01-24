@@ -46,7 +46,7 @@ export default function CartSheetContent() {
               <div className="flex-1">
                 <p className="font-semibold">{item.product.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  ${item.product.price.toFixed(2)}
+                  ₱{item.product.price.toFixed(2)}
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                     <Button
@@ -78,7 +78,7 @@ export default function CartSheetContent() {
       <div className="border-t px-6 py-4">
         <div className="flex justify-between font-semibold">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>₱{subtotal.toFixed(2)}</span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Shipping and taxes calculated at checkout.

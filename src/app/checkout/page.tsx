@@ -125,22 +125,22 @@ export default function CheckoutPage() {
                       <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-medium">₱{(item.product.price * item.quantity).toFixed(2)}</p>
                 </div>
               ))}
             </div>
             <div className="mt-6 border-t pt-4 space-y-2">
               <div className="flex justify-between text-muted-foreground">
                 <p>Subtotal</p>
-                <p>${subtotal.toFixed(2)}</p>
+                <p>₱{subtotal.toFixed(2)}</p>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <p>Shipping</p>
-                <p>${shipping.toFixed(2)}</p>
+                <p>₱{shipping.toFixed(2)}</p>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <p>Total</p>
-                <p>${total.toFixed(2)}</p>
+                <p>₱{total.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>

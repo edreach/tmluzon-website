@@ -46,9 +46,9 @@ export async function processOrder(
   console.log(`Shipping Address: ${address}, ${city}, ${state} ${zip}`);
   console.log("--- Items ---");
   cart.forEach(item => {
-    console.log(`- ${item.product.name} (x${item.quantity}) - $${(item.product.price * item.quantity).toFixed(2)}`);
+    console.log(`- ${item.product.name} (x${item.quantity}) - ₱${(item.product.price * item.quantity).toFixed(2)}`);
   });
-  console.log(`--- Total: $${(subtotal + 5.00).toFixed(2)} ---`);
+  console.log(`--- Total: ₱${(subtotal + 5.00).toFixed(2)} ---`);
   console.log("SIMULATING: Sending order confirmation to store owner and customer.");
   
   // For demonstration, we'll just return a success message.
