@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, ShoppingCart, Sun } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
+import { useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -19,6 +20,7 @@ const navLinks = [
 export default function Header() {
   const { cart } = useCart();
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900 text-slate-50">
@@ -74,10 +76,40 @@ export default function Header() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-              <Button variant="ghost" size="icon" className="hover:bg-slate-800">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hover:bg-slate-800">
+                        <Menu className="h-6 w-6" />
+                        <span className="sr-only">Toggle menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-slate-900 text-slate-50 border-slate-700">
+                    <SheetHeader>
+                        <SheetTitle>
+                            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                                <span className="font-bold text-lg">TM Luzon</span>
+                            </Link>
+                        </SheetTitle>
+                    </SheetHeader>
+                    <nav className="flex flex-col gap-4 mt-8">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="text-lg font-medium transition-colors hover:text-white"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
+                    <div className="mt-8 border-t border-slate-700 pt-4">
+                        <Button asChild className="w-full">
+                            <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                        </Button>
+                    </div>
+                </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
