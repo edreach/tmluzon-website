@@ -46,16 +46,7 @@ export default function Home() {
   return (
     <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Comprehensive HVAC Solutions
-          </h1>
-          <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-            From installation to maintenance and emergency repairs, we offer a complete range of services to keep your systems running efficiently.
-          </p>
-        </div>
-
-        <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px]">
                 <Image src="https://picsum.photos/seed/rainy-promo/1200/900" alt="Rainy Season Promo" fill className="object-cover brightness-75" data-ai-hint="night sky church" />
@@ -91,6 +82,15 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <div className="text-center mt-16">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Comprehensive HVAC Solutions
+          </h1>
+          <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+            From installation to maintenance and emergency repairs, we offer a complete range of services to keep your systems running efficiently.
+          </p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
