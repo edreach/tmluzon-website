@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, ShoppingCart, Sun } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -19,11 +20,17 @@ const navLinks = [
 export default function Header() {
   const { cart } = useCart();
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const [className, setClassName] = useState("flex items-center");
+
+  useEffect(() => {
+    setClassName("flex items-center md:ml-72");
+  }, []);
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900 text-slate-50">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center md:ml-72">
+        <div className={className}>
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
