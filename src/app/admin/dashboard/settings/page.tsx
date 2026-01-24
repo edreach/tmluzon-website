@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -26,8 +27,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser, useStorage } from "@/firebase";
-import { collection, doc } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser, useStorage, useAuth } from "@/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
 import {
   Dialog,
@@ -44,15 +45,17 @@ import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 
 export default function SettingsPage() {
     const firestore = useFirestore();
     const storage = useStorage();
+    const auth = useAuth();
     const { toast } = useToast();
     const { isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
-    const [newUser, setNewUser] = useState({ name: '', email: '' });
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
 
     // Logo state
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -90,25 +93,51 @@ export default function SettingsPage() {
         }
     };
     
-    const handleAddUser = () => {
-        if (!newUser.name || !newUser.email) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please enter name and email.' });
+    const handleAddUser = async () => {
+        if (!newUser.name || !newUser.email || !newUser.password) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Please enter name, email, and password.' });
+            return;
+        }
+
+        if (newUser.password.length < 6) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Password must be at least 6 characters.' });
             return;
         }
         
-        if (!firestore) return;
+        if (!firestore || !auth) return;
 
-        const usersCollection = collection(firestore, "users");
-        const newUserDocRef = doc(usersCollection);
-        
-        setDocumentNonBlocking(newUserDocRef, { 
-            ...newUser, 
-            uid: newUserDocRef.id 
-        }, { merge: true });
+        try {
+            // This will sign in the new user and sign out the current admin.
+            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password);
+            const authUser = userCredential.user;
+            
+            // Create the user profile in Firestore using the UID from Auth as the document ID.
+            const userDocRef = doc(firestore, "users", authUser.uid);
+            await setDoc(userDocRef, { 
+                uid: authUser.uid,
+                name: newUser.name, 
+                email: newUser.email 
+            });
 
-        toast({ title: 'User Added', description: `${newUser.name} has been added.` });
-        setNewUser({ name: '', email: '' });
-        setAddUserDialogOpen(false);
+            toast({ title: 'User Created', description: `${newUser.name} has been created.` });
+            setNewUser({ name: '', email: '', password: '' });
+            setAddUserDialogOpen(false);
+
+            // Inform the admin that they've been signed out.
+            toast({
+                title: "Admin Action Required",
+                description: "The new user has been created and signed in. Please sign out and sign back in with your admin account to continue.",
+                duration: 9000,
+            });
+
+        } catch (error: any) {
+            console.error("Error creating user:", error);
+            toast({ 
+                variant: 'destructive', 
+                title: 'User Creation Failed', 
+                description: error.message || 'An unknown error occurred.' 
+            });
+        }
     };
     
     const handleDeleteUser = (userToDelete: UserProfile & { id: string }) => {
@@ -234,7 +263,7 @@ export default function SettingsPage() {
                                     <DialogHeader>
                                         <DialogTitle>Add New User</DialogTitle>
                                         <DialogDescription>
-                                            Enter the user's details. This will only create a record in the database. You must create the actual user account in the Firebase Authentication console.
+                                            Enter the user's details. This will create their account in Firebase Authentication and sign you out. You will need to log back in.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
@@ -244,7 +273,11 @@ export default function SettingsPage() {
                                         </div>
                                         <div className="grid grid-cols-4 items-center gap-4">
                                             <Label htmlFor="email" className="text-right">Email</Label>
-                                            <Input id="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value })} className="col-span-3" />
+                                            <Input id="email" type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value })} className="col-span-3" />
+                                        </div>
+                                        <div className="grid grid-cols-4 items-center gap-4">
+                                            <Label htmlFor="password" className="text-right">Password</Label>
+                                            <Input id="password" type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value })} className="col-span-3" />
                                         </div>
                                     </div>
                                     <DialogFooter>
@@ -314,4 +347,5 @@ export default function SettingsPage() {
             </div>
         </>
     );
-}
+
+    
