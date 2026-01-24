@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, Package } from "lucide-react";
+import {
+  Briefcase,
+  Info,
+  LogOut,
+  Newspaper,
+  Package,
+  Tag,
+} from "lucide-react";
 import Link from "next/link";
 import { logout } from "../actions";
 
@@ -27,21 +34,49 @@ export default function DashboardLayout({
                 <Package className="h-4 w-4" />
                 Products
               </Link>
+              <Link
+                href="#"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Briefcase className="h-4 w-4" />
+                Services
+              </Link>
+              <Link
+                href="#"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Tag className="h-4 w-4" />
+                Pricelist
+              </Link>
+              <Link
+                href="#"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Info className="h-4 w-4" />
+                About Us
+              </Link>
+              <Link
+                href="#"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Newspaper className="h-4 w-4" />
+                News
+              </Link>
             </nav>
           </div>
           <div className="mt-auto p-4">
             <form action={logout}>
-                <Button size="sm" className="w-full">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                </Button>
+              <Button size="sm" className="w-full">
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
             </form>
           </div>
         </div>
       </div>
       <div className="flex flex-col">
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {children}
+          {children}
         </main>
       </div>
     </div>
