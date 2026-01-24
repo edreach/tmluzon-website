@@ -52,7 +52,6 @@ export type Service = {
 };
 
 export type UserProfile = {
-    id: string;
     uid: string;
     name: string;
     email: string;
@@ -61,4 +60,8 @@ export type UserProfile = {
 export type AdminRole = {
     id: string;
     uid: string;
+}
+
+export type SiteSettings = {
+    logoUrl?: string;
 }
