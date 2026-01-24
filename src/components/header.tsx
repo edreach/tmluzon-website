@@ -24,25 +24,32 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
+      {/* The 'relative' class here is crucial. It acts as the anchor 
+        for the absolutely positioned nav element.
+      */}
       <div className="container relative flex h-16 items-center justify-between">
+        
+        {/* LEFT: Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
         </div>
         
+        {/* CENTERED: Desktop Navigation */}
         <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-6 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="transition-colors hover:text-primary"
+              className="transition-colors hover:text-primary whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
+        {/* RIGHT: Cart, Login, and Mobile Toggle */}
         <div className="flex items-center justify-end space-x-2">
           <Sheet>
             <SheetTrigger asChild>
