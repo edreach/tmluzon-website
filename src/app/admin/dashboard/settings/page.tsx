@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -140,6 +139,7 @@ export default function SettingsPage() {
 
         setIsUploading(true);
         setUploadProgress(0);
+        console.log("Starting upload for:", logoFile.name);
 
         const sRef = storageRef(storage, `logos/${Date.now()}-${logoFile.name}`);
         const uploadTask = uploadBytesResumable(sRef, logoFile);
@@ -147,16 +147,23 @@ export default function SettingsPage() {
         uploadTask.on('state_changed',
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Upload is ${progress}% done. State: ${snapshot.state}`);
                 setUploadProgress(progress);
             },
             (error) => {
-                console.error("Upload failed:", error);
-                toast({ variant: 'destructive', title: 'Upload Failed', description: "Please check storage rules in Firebase Console. " + error.message });
+                console.error("Upload failed with error:", error);
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'Upload Failed', 
+                    description: `Storage permission error. Please check your Firebase Storage rules in the console. Details: ${error.message}` 
+                });
                 setIsUploading(false);
                 setUploadProgress(0);
             },
             () => {
+                console.log("Upload complete. Getting download URL...");
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    console.log("Download URL obtained:", downloadURL);
                     const settingsDocRef = doc(firestore, 'admin/dashboard/settings/tmluzon');
                     setDocumentNonBlocking(settingsDocRef, { logoUrl: downloadURL }, { merge: true });
 
@@ -164,6 +171,7 @@ export default function SettingsPage() {
                     
                     setIsUploading(false);
                     setLogoFile(null);
+                    // Hide progress bar after a delay
                     setTimeout(() => setUploadProgress(0), 2000);
                 });
             }
