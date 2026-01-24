@@ -18,7 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Trash2, UserPlus, Shield, ShieldOff } from "lucide-react";
+import { MoreHorizontal, UserPlus, Shield, ShieldOff, Trash2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,8 +26,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole } from "@/lib/types";
 import {
   Dialog,
@@ -46,27 +46,43 @@ import { setDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocki
 export default function SettingsPage() {
     const firestore = useFirestore();
     const { toast } = useToast();
+    const { user, isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '' });
 
-    const usersQuery = useMemoFirebase(() => collection(firestore, 'users'), [firestore]);
+    // 1. Check if the current user is an admin.
+    const currentUserAdminRoleDoc = useMemoFirebase(
+      () => (user ? doc(firestore, 'roles_admin', user.uid) : null),
+      [firestore, user]
+    );
+    const { data: currentUserAdminRole, isLoading: isLoadingAdminRole } = useDoc<AdminRole>(currentUserAdminRoleDoc);
+    const isCurrentUserAdmin = !!currentUserAdminRole;
+    
+    // 2. Only if the user is an admin, fetch the list of all users and all admin roles.
+    const usersQuery = useMemoFirebase(
+        () => (isCurrentUserAdmin ? collection(firestore, 'users') : null), 
+        [firestore, isCurrentUserAdmin]
+    );
     const { data: users, isLoading: isLoadingUsers } = useCollection<UserProfile>(usersQuery);
     
-    const adminRolesQuery = useMemoFirebase(() => collection(firestore, 'roles_admin'), [firestore]);
+    const adminRolesQuery = useMemoFirebase(
+        () => (isCurrentUserAdmin ? collection(firestore, 'roles_admin') : null), 
+        [firestore, isCurrentUserAdmin]
+    );
     const { data: adminRoles } = useCollection<AdminRole>(adminRolesQuery);
 
     const adminRoleIds = adminRoles?.map(role => role.id) || [];
-
-    const handleToggleAdmin = (user: UserProfile) => {
-        if (!user.uid) return;
-        const isAdmin = adminRoleIds.includes(user.uid);
-        const roleRef = doc(firestore, 'roles_admin', user.uid);
+    
+    const handleToggleAdmin = (userToUpdate: UserProfile) => {
+        if (!userToUpdate.uid) return;
+        const isAdmin = adminRoleIds.includes(userToUpdate.uid);
+        const roleRef = doc(firestore, 'roles_admin', userToUpdate.uid);
         if (isAdmin) {
             deleteDocumentNonBlocking(roleRef);
-            toast({ title: "Admin Removed", description: `${user.name} is no longer an admin.` });
+            toast({ title: "Admin Removed", description: `${userToUpdate.name} is no longer an admin.` });
         } else {
-            setDocumentNonBlocking(roleRef, { uid: user.uid }, {});
-            toast({ title: "Admin Added", description: `${user.name} is now an admin.` });
+            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid }, {});
+            toast({ title: "Admin Added", description: `${userToUpdate.name} is now an admin.` });
         }
     };
     
@@ -77,40 +93,35 @@ export default function SettingsPage() {
         }
 
         try {
-            const usersCollection = collection(firestore, 'users');
-            // In a real app, you would use a more robust unique ID generation
             const newUserId = `user_${Date.now()}`;
-            await addDocumentNonBlocking(usersCollection, { ...newUser, uid: newUserId });
+            // When adding a user via this form, we explicitly set the `id` field to be the same as `uid` for consistency
+            // since `useCollection` adds the document ID as `id` on the returned object.
+            await addDocumentNonBlocking(collection(firestore, 'users'), { ...newUser, uid: newUserId, id: newUserId });
 
             toast({ title: 'User Added', description: `${newUser.name} has been added.` });
             setNewUser({ name: '', email: '' });
             setAddUserDialogOpen(false);
             
-            // NOTE: This only creates a user document in Firestore.
-            // The actual Firebase Authentication user must be created separately
-            // through the Firebase Console or a dedicated sign-up page.
-
         } catch (error) {
             console.error("Error adding user:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not add user.' });
         }
     };
     
-    const handleDeleteUser = (user: UserProfile) => {
-        if (!user.uid) return;
-        const userRef = doc(firestore, 'users', user.id);
+    const handleDeleteUser = (userToDelete: UserProfile) => {
+        if (!userToDelete.id) return;
+        const userRef = doc(firestore, 'users', userToDelete.id);
         deleteDocumentNonBlocking(userRef);
         
-        // Also remove from admin roles if they are one
-        if(adminRoleIds.includes(user.uid)) {
-            const roleRef = doc(firestore, 'roles_admin', user.uid);
+        if(userToDelete.uid && adminRoleIds.includes(userToDelete.uid)) {
+            const roleRef = doc(firestore, 'roles_admin', userToDelete.uid);
             deleteDocumentNonBlocking(roleRef);
         }
 
-        toast({ title: 'User Deleted', description: `${user.name} has been removed.` });
-        // NOTE: This only deletes the Firestore document, not the Auth user.
+        toast({ title: 'User Deleted', description: `${userToDelete.name} has been removed.` });
     }
 
+    const isLoading = isAuthLoading || isLoadingAdminRole;
 
     return (
         <>
@@ -145,7 +156,7 @@ export default function SettingsPage() {
                             </div>
                             <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button>
+                                     <Button disabled={!isCurrentUserAdmin}>
                                         <UserPlus className="mr-2 h-4 w-4" />
                                         Add User
                                     </Button>
@@ -187,41 +198,57 @@ export default function SettingsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {isLoadingUsers && (
+                                {isLoading && (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center">Loading users...</TableCell>
+                                        <TableCell colSpan={4} className="text-center">Verifying permissions...</TableCell>
                                     </TableRow>
                                 )}
-                                {users?.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>{adminRoleIds.includes(user.uid) ? "Administrator" : "User"}</TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleToggleAdmin(user)}>
-                                                        {adminRoleIds.includes(user.uid) ? (
-                                                            <><ShieldOff className="mr-2 h-4 w-4" />Remove Admin</>
-                                                        ) : (
-                                                            <><Shield className="mr-2 h-4 w-4" />Make Admin</>
-                                                        )}
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(user)}>
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                {!isLoading && !isCurrentUserAdmin && (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center text-destructive">
+                                            You do not have permission to manage users.
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )}
+                                {!isLoading && isCurrentUserAdmin && (
+                                    <>
+                                        {isLoadingUsers && (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="text-center">Loading users...</TableCell>
+                                            </TableRow>
+                                        )}
+                                        {users?.map((user) => (
+                                            <TableRow key={user.id}>
+                                                <TableCell className="font-medium">{user.name}</TableCell>
+                                                <TableCell>{user.email}</TableCell>
+                                                <TableCell>{adminRoleIds.includes(user.uid) ? "Administrator" : "User"}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                            <DropdownMenuItem onClick={() => handleToggleAdmin(user)}>
+                                                                {adminRoleIds.includes(user.uid) ? (
+                                                                    <><ShieldOff className="mr-2 h-4 w-4" />Remove Admin</>
+                                                                ) : (
+                                                                    <><Shield className="mr-2 h-4 w-4" />Make Admin</>
+                                                                )}
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(user)}>
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </>
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

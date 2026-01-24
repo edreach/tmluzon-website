@@ -151,11 +151,11 @@ service cloud.firestore {
      * @description Collection that defines who has admin privileges.
      * @path /roles_admin/{userId}
      * @allow (create) An existing admin can grant admin rights to another user.
-     * @deny (get, list) No one can read or list the admins to prevent user enumeration.
-     * @principle Access to this collection is restricted to existing admins, creating a secure way to manage roles.
+     * @deny (list) No one but an admin can list the admins to prevent user enumeration.
+     * @principle Access to this collection is restricted to existing admins, creating a secure way to manage roles. A user can read their own role doc.
      */
     match /roles_admin/{userId} {
-      allow get: if isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isAdmin();
       allow update: if isAdmin() && isExistingDoc();
