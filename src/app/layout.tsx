@@ -4,8 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "@/contexts/cart-context";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { ConditionalHeader, ConditionalFooter } from "@/components/conditional-layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,9 +30,9 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased flex flex-col h-full", inter.variable)}>
         <CartProvider>
-          <Header />
+          <ConditionalHeader />
           <main className="flex-grow">{children}</main>
-          <Footer />
+          <ConditionalFooter />
         </CartProvider>
         <Toaster />
       </body>
