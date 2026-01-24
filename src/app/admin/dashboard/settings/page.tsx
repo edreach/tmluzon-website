@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useStorage, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase";
+import { useCollection, useDoc, useFirestore, useStorage, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
 import {
@@ -88,7 +88,7 @@ export default function SettingsPage() {
         }
     };
     
-    const handleAddUser = () => {
+    const handleAddUser = async () => {
         if (!newUser.name || !newUser.email) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please enter name and email.' });
             return;
@@ -96,9 +96,10 @@ export default function SettingsPage() {
         
         if (!firestore) return;
 
-        const newUserRef = doc(collection(firestore, "users"));
-        const newUserId = newUserRef.id;
-        setDocumentNonBlocking(newUserRef, { ...newUser, uid: newUserId }, { merge: true });
+        const newUserRef = await addDocumentNonBlocking(collection(firestore, "users"), { ...newUser });
+        if(newUserRef) {
+            updateDocumentNonBlocking(newUserRef, { uid: newUserRef.id });
+        }
 
         toast({ title: 'User Added', description: `${newUser.name} has been added.` });
         setNewUser({ name: '', email: '' });
