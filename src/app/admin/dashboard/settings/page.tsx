@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useStorage, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
+import { useCollection, useDoc, useFirestore, useStorage, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
 import {
@@ -49,6 +49,7 @@ export default function SettingsPage() {
     const firestore = useFirestore();
     const storage = useStorage();
     const { toast } = useToast();
+    const { isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '' });
 
@@ -58,18 +59,18 @@ export default function SettingsPage() {
     const [isUploading, setIsUploading] = useState(false);
 
     // Fetch site settings
-    const settingsRef = useMemoFirebase(() => firestore ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null, [firestore]);
+    const settingsRef = useMemoFirebase(() => (firestore && !isAuthLoading) ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null, [firestore, isAuthLoading]);
     const { data: siteSettings } = useDoc<SiteSettings>(settingsRef);
 
     const usersQuery = useMemoFirebase(
-        () => firestore ? collection(firestore, 'users') : null, 
-        [firestore]
+        () => (firestore && !isAuthLoading) ? collection(firestore, 'users') : null, 
+        [firestore, isAuthLoading]
     );
     const { data: users, isLoading: isLoadingUsers } = useCollection<UserProfile>(usersQuery);
     
     const adminRolesQuery = useMemoFirebase(
-        () => firestore ? collection(firestore, 'roles_admin') : null, 
-        [firestore]
+        () => (firestore && !isAuthLoading) ? collection(firestore, 'roles_admin') : null, 
+        [firestore, isAuthLoading]
     );
     const { data: adminRoles, isLoading: isLoadingAdminRoles } = useCollection<AdminRole>(adminRolesQuery);
 
@@ -88,7 +89,7 @@ export default function SettingsPage() {
         }
     };
     
-    const handleAddUser = async () => {
+    const handleAddUser = () => {
         if (!newUser.name || !newUser.email) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please enter name and email.' });
             return;
@@ -96,10 +97,14 @@ export default function SettingsPage() {
         
         if (!firestore) return;
 
-        const newUserRef = await addDocumentNonBlocking(collection(firestore, "users"), { ...newUser });
-        if(newUserRef) {
-            updateDocumentNonBlocking(newUserRef, { uid: newUserRef.id });
-        }
+        const usersCollection = collection(firestore, "users");
+        const newUserDocRef = doc(usersCollection); // Create a reference with a new ID
+        
+        // Save the user with the generated ID as the uid
+        setDocumentNonBlocking(newUserDocRef, { 
+            ...newUser, 
+            uid: newUserDocRef.id 
+        }, {});
 
         toast({ title: 'User Added', description: `${newUser.name} has been added.` });
         setNewUser({ name: '', email: '' });
@@ -158,7 +163,7 @@ export default function SettingsPage() {
         );
     };
 
-    const isLoading = isLoadingUsers || isLoadingAdminRoles;
+    const isLoading = isAuthLoading || isLoadingUsers || isLoadingAdminRoles;
 
     return (
         <>
@@ -174,7 +179,7 @@ export default function SettingsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {siteSettings?.logoUrl && (
+                        {siteSettings?.logoUrl && !isLoading && (
                             <div>
                                 <Label>Current Logo</Label>
                                 <div className="mt-2 relative w-40 h-16 bg-muted rounded-md flex items-center justify-center border">
