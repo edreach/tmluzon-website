@@ -43,7 +43,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center justify-end space-x-2">
+        <div className="flex items-center justify-end space-x-2 pr-8">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
