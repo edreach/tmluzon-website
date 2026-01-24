@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "@/contexts/cart-context";
 import { ConditionalHeader, ConditionalFooter } from "@/components/conditional-layout";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,11 +30,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased flex flex-col h-full", inter.variable)}>
-        <CartProvider>
-          <ConditionalHeader />
-          <main className="flex-grow">{children}</main>
-          <ConditionalFooter />
-        </CartProvider>
+        <FirebaseClientProvider>
+          <CartProvider>
+            <ConditionalHeader />
+            <main className="flex-grow">{children}</main>
+            <ConditionalFooter />
+          </CartProvider>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

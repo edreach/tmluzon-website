@@ -50,3 +50,15 @@ export type Service = {
   price: number;
   description: string;
 };
+
+export type UserProfile = {
+    id: string;
+    uid: string;
+    name: string;
+    email: string;
+}
+
+export type AdminRole = {
+    id: string;
+    uid: string;
+}
