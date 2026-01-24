@@ -1,7 +1,8 @@
 "use client";
 
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useFirestore, useUser } from "@/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Chrome } from "lucide-react";
 
 export default function AdminLoginPage() {
     const auth = useAuth();
+    const firestore = useFirestore();
     const { user, isUserLoading } = useUser();
     const router = useRouter();
 
@@ -19,11 +21,27 @@ export default function AdminLoginPage() {
     }, [user, isUserLoading, router]);
 
     const handleGoogleSignIn = async () => {
-        if (!auth) return;
+        if (!auth || !firestore) return;
         const provider = new GoogleAuthProvider();
         try {
-            await signInWithPopup(auth, provider);
-            // After successful sign-in, the auth guard in the dashboard layout will handle redirection or denial.
+            const result = await signInWithPopup(auth, provider);
+            const authUser = result.user;
+
+            if (authUser) {
+                 // After successful sign-in, check if a user profile exists in Firestore.
+                const userDocRef = doc(firestore, "users", authUser.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                // If the user profile doesn't exist, create it.
+                if (!userDocSnap.exists()) {
+                    await setDoc(userDocRef, {
+                        uid: authUser.uid,
+                        name: authUser.displayName,
+                        email: authUser.email,
+                    });
+                }
+            }
+            // After successful sign-in, the auth guard in the dashboard layout will handle redirection.
         } catch (error) {
             console.error("Error during Google sign-in:", error);
         }
