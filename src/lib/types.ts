@@ -43,3 +43,10 @@ export type ProductListingItem = {
   type: string;
   subType: string;
 };
+
+export type Service = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+};
