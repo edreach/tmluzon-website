@@ -24,17 +24,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-16 items-center">
         
         {/* LEFT: Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
         </div>
         
         {/* CENTERED: Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex justify-center items-center space-x-6 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.label}
