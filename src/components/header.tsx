@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, ShoppingCart, Sun } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
 import { useState } from "react";
@@ -67,10 +67,6 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-2">
             <Button asChild>
                 <Link href="/admin">Login</Link>
-            </Button>
-            <Button variant="ghost" size="icon">
-                <Sun className="h-5 w-5" />
-                <span className="sr-only">Toggle theme</span>
             </Button>
           </div>
 
