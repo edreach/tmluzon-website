@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import * as React from 'react';
 import {
     Card,
     CardContent,
@@ -15,7 +18,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { productListings } from "@/lib/data";
+import { productListings as allProducts } from "@/lib/data";
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
     DropdownMenu,
@@ -25,9 +28,18 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { ProductListingItem } from '@/lib/types';
 
 
 export default function Dashboard() {
+    const [itemsPerPage, setItemsPerPage] = React.useState(10);
+    const [paginatedProducts, setPaginatedProducts] = React.useState<ProductListingItem[]>([]);
+
+    React.useEffect(() => {
+        setPaginatedProducts(allProducts.slice(0, itemsPerPage));
+    }, [itemsPerPage]);
+
     return (
         <>
             <div className="flex items-center">
@@ -42,9 +54,24 @@ export default function Dashboard() {
                 </div>
             </div>
             <Card>
-                <CardHeader>
-                    <CardTitle>Product Catalog</CardTitle>
-                    <CardDescription>Manage your products here.</CardDescription>
+                <CardHeader className="flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Product Catalog</CardTitle>
+                        <CardDescription>Manage your products here.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-muted-foreground whitespace-nowrap">Show items:</label>
+                        <Select value={String(itemsPerPage)} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                            <SelectTrigger className="w-[80px]">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="30">30</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -60,7 +87,7 @@ export default function Dashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {productListings.map((product) => (
+                            {paginatedProducts.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">{product.name}</TableCell>
                                     <TableCell>

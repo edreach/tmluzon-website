@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import * as React from 'react';
 import {
     Card,
     CardContent,
@@ -15,7 +18,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { serviceListings } from "@/lib/data";
+import { serviceListings as allServices } from "@/lib/data";
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
     DropdownMenu,
@@ -24,8 +27,18 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Service } from '@/lib/types';
+
 
 export default function ServicesPage() {
+    const [itemsPerPage, setItemsPerPage] = React.useState(10);
+    const [paginatedServices, setPaginatedServices] = React.useState<Service[]>([]);
+
+    React.useEffect(() => {
+        setPaginatedServices(allServices.slice(0, itemsPerPage));
+    }, [itemsPerPage]);
+
     return (
         <>
             <div className="flex items-center">
@@ -40,9 +53,24 @@ export default function ServicesPage() {
                 </div>
             </div>
             <Card>
-                <CardHeader>
-                    <CardTitle>Service Catalog</CardTitle>
-                    <CardDescription>Manage your services here.</CardDescription>
+                 <CardHeader className="flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Service Catalog</CardTitle>
+                        <CardDescription>Manage your services here.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-muted-foreground whitespace-nowrap">Show items:</label>
+                        <Select value={String(itemsPerPage)} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                            <SelectTrigger className="w-[80px]">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="30">30</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -57,7 +85,7 @@ export default function ServicesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {serviceListings.map((service) => (
+                            {paginatedServices.map((service) => (
                                 <TableRow key={service.id}>
                                     <TableCell className="font-medium">{service.name}</TableCell>
                                     <TableCell>{service.description.substring(0, 100)}...</TableCell>
