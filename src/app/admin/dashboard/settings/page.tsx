@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useStorage, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from "@/firebase";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
 import {
@@ -40,14 +40,12 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 
 
 export default function SettingsPage() {
     const firestore = useFirestore();
-    const storage = useStorage();
     const { toast } = useToast();
     const { isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
@@ -100,7 +98,6 @@ export default function SettingsPage() {
         const usersCollection = collection(firestore, "users");
         const newUserDocRef = doc(usersCollection); // Create a reference with a new ID
         
-        // Save the user with the generated ID as the uid
         setDocumentNonBlocking(newUserDocRef, { 
             ...newUser, 
             uid: newUserDocRef.id 
@@ -130,37 +127,47 @@ export default function SettingsPage() {
     };
 
     const handleUploadLogo = () => {
-        if (!logoFile || !storage || !firestore) {
+        if (!logoFile || !firestore) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please select a file to upload.' });
             return;
         }
 
+        // Prevent storing huge files in Firestore
+        if (logoFile.size > 750 * 1024) { // Roughly 750KB file size limit for Base64 encoding
+             toast({ 
+                 variant: 'destructive', 
+                 title: 'File too large', 
+                 description: 'Please upload a logo smaller than 750KB.' 
+             });
+             return;
+        }
+        
         setIsUploading(true);
-        const storageRef = ref(storage, `logos/site_logo`);
-        const uploadTask = uploadBytesResumable(storageRef, logoFile);
+        setUploadProgress(50); // Set to 50% to show progress
 
-        uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setUploadProgress(progress);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-                toast({ variant: 'destructive', title: 'Upload Failed', description: error.message });
-                setIsUploading(false);
-            },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    const settingsDocRef = doc(firestore, 'admin/dashboard/settings/tmluzon');
-                    setDocumentNonBlocking(settingsDocRef, { logoUrl: downloadURL }, { merge: true });
-                    toast({ title: 'Logo Updated!', description: 'Your new site logo has been saved.' });
-                    setIsUploading(false);
-                    setLogoFile(null);
-                    setUploadProgress(0);
-                });
-            }
-        );
+        const reader = new FileReader();
+        reader.readAsDataURL(logoFile);
+
+        reader.onload = () => {
+            const base64Logo = reader.result as string;
+            const settingsDocRef = doc(firestore, 'admin/dashboard/settings/tmluzon');
+            setDocumentNonBlocking(settingsDocRef, { logoUrl: base64Logo }, { merge: true });
+            
+            setUploadProgress(100);
+            toast({ title: 'Logo Updated!', description: 'Your new site logo has been saved.' });
+            
+            // Reset state after upload
+            setIsUploading(false);
+            setLogoFile(null);
+            setTimeout(() => setUploadProgress(0), 1000); // Clear progress bar after a short delay
+        };
+
+        reader.onerror = (error) => {
+            console.error("File reading failed:", error);
+            toast({ variant: 'destructive', title: 'Upload Failed', description: "Could not read the file." });
+            setIsUploading(false);
+            setUploadProgress(0);
+        };
     };
 
     const isLoading = isAuthLoading || isLoadingUsers || isLoadingAdminRoles;
@@ -191,7 +198,7 @@ export default function SettingsPage() {
                             <Label htmlFor="logo-upload" className="sr-only">Upload logo</Label>
                             <Input id="logo-upload" type="file" className="flex-1" onChange={handleFileSelect} disabled={isUploading} accept="image/png, image/jpeg, image/svg+xml" />
                             <Button onClick={handleUploadLogo} disabled={isUploading || !logoFile}>
-                                {isUploading ? `Uploading... ${uploadProgress.toFixed(0)}%` : 'Upload'}
+                                {isUploading ? `Uploading...` : 'Upload'}
                             </Button>
                         </div>
                         {isUploading && <Progress value={uploadProgress} className="w-full" />}
