@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "lamp-1",
+      "description": "A modern teal lamp on a wooden table.",
+      "imageUrl": "https://images.unsplash.com/photo-1725914038345-0338a8e588de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjBsYW1wfGVufDB8fHx8MTc2OTI0MDIxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern lamp"
+    },
+    {
+      "id": "lamp-2",
+      "description": "Close-up of the lamp's texture and material.",
+      "imageUrl": "https://images.unsplash.com/photo-1640505194137-57aa3624273c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxsYW1wJTIwdGV4dHVyZXxlbnwwfHx8fDE3NjkyNDAyMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lamp texture"
+    },
+    {
+      "id": "lamp-3",
+      "description": "The lamp illuminating a cozy living room corner.",
+      "imageUrl": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsaXZpbmclMjByb29tfGVufDB8fHx8MTc2OTIxMjI0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "living room"
+    },
+    {
+      "id": "lamp-4",
+      "description": "The lamp from a different angle, showing its sleek profile.",
+      "imageUrl": "https://images.unsplash.com/photo-1750306956468-c07447ecdff4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzbGVlayUyMGxhbXB8ZW58MHx8fHwxNzY5MjQwMjE1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sleek lamp"
+    },
+    {
+      "id": "avatar-1",
+      "description": "Avatar for a customer review.",
+      "imageUrl": "https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjkxNzMxMTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar-2",
+      "description": "Avatar for a customer review.",
+      "imageUrl": "https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzY5MTk3NzY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "avatar-3",
+      "description": "Avatar for a customer review.",
+      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYW4lMjBmYWNlfGVufDB8fHx8MTc2OTE4OTcxOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man face"
+    }
+  ]
 }
