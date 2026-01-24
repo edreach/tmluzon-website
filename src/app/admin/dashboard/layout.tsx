@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import type { UserProfile } from "@/lib/types";
+import type { UserProfile, AdminRole } from "@/lib/types";
 
 export default function DashboardLayout({
   children,
@@ -34,6 +34,11 @@ export default function DashboardLayout({
   const userDocRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
 
+  // Check if the user has an admin role
+  const adminRoleRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'roles_admin', user.uid) : null, [firestore, user]);
+  const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc<AdminRole>(adminRoleRef);
+
+
   useEffect(() => {
     // If auth state is done loading and there's no user, redirect to login
     if (!isUserLoading && !user) {
@@ -41,26 +46,33 @@ export default function DashboardLayout({
       return;
     }
 
-    // If user is logged in, but profile is done loading and doesn't exist in 'users' collection
-    if (!isUserLoading && user && !isProfileLoading && !userProfile) {
-        toast({
-            title: "Unauthorized",
-            description: "You do not have permission to access this dashboard.",
-            variant: "destructive",
-        });
-        auth.signOut(); // Sign out the unauthorized user
-        router.replace('/admin'); // Redirect to login
+    const isAuthorizing = isProfileLoading || isAdminRoleLoading;
+
+    // Once auth is done and authorization checks are complete...
+    if (!isUserLoading && user && !isAuthorizing) {
+        // ...and the user is not an admin, sign them out.
+        if (!adminRole) {
+            toast({
+                title: "Unauthorized",
+                description: "You do not have permission to access this dashboard.",
+                variant: "destructive",
+            });
+            auth.signOut(); // Sign out the unauthorized user
+            router.replace('/admin'); // Redirect to login
+        }
     }
 
-  }, [user, isUserLoading, userProfile, isProfileLoading, router, auth, toast]);
+  }, [user, isUserLoading, userProfile, isProfileLoading, adminRole, isAdminRoleLoading, router, auth, toast]);
 
   const handleLogout = async () => {
     await auth.signOut();
     router.push('/admin');
   };
 
+  const isLoading = isUserLoading || (user && (isProfileLoading || isAdminRoleLoading));
+
   // Show a loading screen while we verify authentication and authorization
-  if (isUserLoading || (user && isProfileLoading)) {
+  if (isLoading) {
       return (
           <div className="flex h-screen w-full items-center justify-center">
               <p>Verifying access...</p>
@@ -69,7 +81,7 @@ export default function DashboardLayout({
   }
   
   // If user is authenticated and authorized, show the dashboard
-  if (user && userProfile) {
+  if (user && adminRole) {
     return (
       <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-muted/40 md:block">
