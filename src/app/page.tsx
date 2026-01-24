@@ -1,7 +1,16 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Award, ShieldCheck, Truck } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { productListings } from "@/lib/data";
 
 export default function Home() {
   const services = [
@@ -141,6 +150,60 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        <div className="mt-24">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl font-headline">
+              Featured Products
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+              Check out our top-of-the-line HVAC units, designed for maximum efficiency and reliability.
+            </p>
+          </div>
+          <div className="mt-16">
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full max-w-6xl mx-auto"
+            >
+              <CarouselContent>
+                {productListings.slice(0, 8).map((product) => (
+                  <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                    <div className="p-1 h-full">
+                      <Card className="overflow-hidden flex flex-col h-full">
+                        <div className="relative w-full h-48 bg-muted">
+                          <Image
+                            src={`https://picsum.photos/seed/${product.id}/400/400`}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            data-ai-hint="hvac unit"
+                          />
+                        </div>
+                        <CardContent className="p-4 text-center flex flex-col flex-grow">
+                          <h3 className="font-semibold text-sm h-10 truncate flex-grow" title={product.name}>{product.name}</h3>
+                          <p className="text-xs text-muted-foreground uppercase">{product.subType}</p>
+                          <Button asChild size="sm" className="mt-4">
+                            <Link href="/products">View Details</Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="-left-4 md:-left-12" />
+              <CarouselNext className="-right-4 md:-right-12" />
+            </Carousel>
+          </div>
+          <div className="mt-8 text-center">
+            <Button size="lg" asChild>
+              <Link href="/products">View All Products</Link>
+            </Button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
