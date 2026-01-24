@@ -1,9 +1,9 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/cart-context";
 import { processOrder } from "./actions";
@@ -28,7 +28,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [state, formAction] = useFormState(processOrder, {
+  const [state, formAction] = useActionState(processOrder, {
     message: "",
     success: false,
   });

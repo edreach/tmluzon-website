@@ -1,12 +1,12 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { saveProduct } from "./product-actions";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
 import { Sparkles } from "lucide-react";
@@ -29,7 +29,7 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
   const [product, setProduct] = useState(initialProduct);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const { toast } = useToast();
-  const [state, formAction] = useFormState(saveProduct, { message: "", success: false });
+  const [state, formAction] = useActionState(saveProduct, { message: "", success: false });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
