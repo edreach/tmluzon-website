@@ -33,3 +33,13 @@ export type CartItem = {
   product: Product;
   quantity: number;
 };
+
+export type ProductListingItem = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  brand: string;
+  type: string;
+  subType: string;
+};

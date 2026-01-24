@@ -8,8 +8,8 @@ import { useCart } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
 
 const navLinks = [
-  { href: "#", label: "Home" },
-  { href: "#", label: "Products" },
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Products" },
   { href: "#", label: "Services" },
   { href: "#", label: "Pricelist" },
   { href: "#", label: "About Us" },

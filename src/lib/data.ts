@@ -1,4 +1,4 @@
-import type { Product, Review } from './types';
+import type { Product, Review, ProductListingItem } from './types';
 
 export const product: Product = {
   id: 'aero-lamp-1',
@@ -85,4 +85,23 @@ export const reviews: Review[] = [
       "imageHint": "woman smiling"
     },
   },
+];
+
+export const productListings: ProductListingItem[] = [
+  { id: 'prod-1', name: 'AC048BNPDKC/TC', description: 'OUTDOOR FLOOR MOUNTED 6HP', price: 95000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Outdoor' },
+  { id: 'prod-2', name: 'AC048BXPDKC/TC', description: 'INDOOR FLOOR MOUNTED 6HP', price: 89000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Indoor' },
+  { id: 'prod-3', name: 'AR09TYHYEWKNTC', description: 'OUTDOOR', price: 52000, brand: 'LG', type: 'Wall Mounted', subType: 'Outdoor' },
+  { id: 'prod-4', name: 'AR12TYHYEWKNTC', description: 'INDOOR', price: 48000, brand: 'LG', type: 'Wall Mounted', subType: 'Indoor' },
+  { id: 'prod-5', name: 'AC036BNPDKC/TC', description: 'OUTDOOR FLOOR MOUNTED 4HP', price: 78000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Outdoor' },
+  { id: 'prod-6', name: 'AC036BXPDKC/TC', description: 'INDOOR FLOOR MOUNTED 4HP', price: 72000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Indoor' },
+  { id: 'prod-7', name: 'AR18TYHYEWKNTC', description: 'OUTDOOR', price: 65000, brand: 'Daikin', type: 'Wall Mounted', subType: 'Outdoor' },
+  { id: 'prod-8', name: 'AR24TYHYEWKNTC', description: 'INDOOR', price: 61000, brand: 'Daikin', type: 'Wall Mounted', subType: 'Indoor' },
+  { id: 'prod-9', name: 'AC060BNPDKC/TC', description: 'OUTDOOR CEILING MOUNTED 8HP', price: 110000, brand: 'Mitsubishi', type: 'Ceiling Mounted', subType: 'Outdoor' },
+  { id: 'prod-10', name: 'AC060BXPDKC/TC', description: 'INDOOR CEILING MOUNTED 8HP', price: 105000, brand: 'Mitsubishi', type: 'Ceiling Mounted', subType: 'Indoor' },
+  { id: 'prod-11', name: 'AR30TYHYEWKNTC', description: 'OUTDOOR', price: 75000, brand: 'LG', type: 'Wall Mounted', subType: 'Outdoor' },
+  { id: 'prod-12', name: 'AR36TYHYEWKNTC', description: 'INDOOR', price: 70000, brand: 'LG', type: 'Wall Mounted', subType: 'Indoor' },
+  { id: 'prod-13', name: 'FCA100A-W', description: 'Cassette Type', price: 99000, brand: 'Daikin', type: 'Cassette', subType: 'Indoor' },
+  { id: 'prod-14', name: 'FCA125A-W', description: 'Cassette Type', price: 120000, brand: 'Daikin', type: 'Cassette', subType: 'Indoor' },
+  { id: 'prod-15', name: 'AC024BNPDKC/TC', description: 'OUTDOOR FLOOR MOUNTED 2HP', price: 68000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Outdoor' },
+  { id: 'prod-16', name: 'AC024BXPDKC/TC', description: 'INDOOR FLOOR MOUNTED 2HP', price: 63000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Indoor' },
 ];
