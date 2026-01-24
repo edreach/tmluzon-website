@@ -3,67 +3,64 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export default function Home() {
+  const services = [
+    {
+      title: "Fast & Reliable Aircon Repair",
+      description: "Facing a broken AC? Our certified technicians provide fast, expert repair for any aircon problem, offering honest, long-lasting solutions with transparent pricing ...",
+      imageUrl: "https://picsum.photos/seed/aircon-repair/600/400",
+      imageHint: "person sunset"
+    },
+    {
+      title: "Keep Your Cool & Lower Your Bills: Expert Aircon Maintenance",
+      description: "Invest in worry-free comfort with our Aircon Preventive Maintenance Service. We restore peak efficiency, lower energy costs, and prevent costly breakdowns through...",
+      imageUrl: "https://picsum.photos/seed/aircon-maintenance/600/400",
+      imageHint: "person field"
+    },
+    {
+      title: "The Ultimate Cooling Solution: Expert AC Planning, Design & Installation",
+      description: "Our integrated service provides expert planning, design, and installation of highly efficient cooling systems for new homes and major renovations in Bacoor. We ensu...",
+      imageUrl: "https://picsum.photos/seed/aircon-install/600/400",
+      imageHint: "person light"
+    }
+  ];
+
   return (
     <div className="bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2">
-            <Card className="relative h-[550px] w-full overflow-hidden rounded-lg shadow-lg">
-              <Image
-                src="https://picsum.photos/seed/promo-night/1200/800"
-                alt="Rainy Season Promo"
-                fill
-                className="object-cover"
-                data-ai-hint="night sky"
-              />
-              <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-8 text-white">
-                <h2 className="text-4xl font-bold">Rainy Season Promo</h2>
-                <p className="mt-2 text-lg">TM Luzon Engineering Sales & Services Company</p>
-                <p className="text-sm">Prime Asiatique Commercial Center, Buhay Na Tubig I</p>
-                <Button className="mt-4 w-fit">Read More</Button>
-              </div>
-            </Card>
-          </div>
-
-          {/* Right Column */}
-          <div className="flex flex-col gap-8">
-            <Card className="relative h-[260px] w-full overflow-hidden rounded-lg shadow-lg">
-              <Image
-                src="https://picsum.photos/seed/hiring-cactus/600/400"
-                alt="We are hiring"
-                fill
-                className="object-cover"
-                data-ai-hint="cactus needles"
-              />
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4 text-white">
-                <h3 className="text-2xl font-bold">We Are Hiring</h3>
-              </div>
-            </Card>
-            <Card className="relative h-[260px] w-full overflow-hidden rounded-lg shadow-lg">
-              <Image
-                src="https://picsum.photos/seed/hiring-grass/600/400"
-                alt="We are hiring"
-                fill
-                className="object-cover"
-                data-ai-hint="grass field"
-              />
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4 text-white">
-                <h3 className="text-2xl font-bold">We Are Hiring!</h3>
-              </div>
-            </Card>
-          </div>
-        </div>
-
-        {/* HVAC Section */}
-        <section className="mt-16 md:mt-24 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             Comprehensive HVAC Solutions
-          </h2>
+          </h1>
           <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
             From installation to maintenance and emergency repairs, we offer a complete range of services to keep your systems running efficiently.
           </p>
-        </section>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+          {services.map((service) => (
+            <Card key={service.title} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl">
+              <div className="relative w-full h-48">
+                <Image
+                  src={service.imageUrl}
+                  alt={service.title}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={service.imageHint}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-bold h-20">{service.title}</h3>
+                <p className="text-muted-foreground text-sm">
+                  {service.description}
+                </p>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <Button size="lg">View All Services</Button>
+        </div>
       </div>
     </div>
   );
