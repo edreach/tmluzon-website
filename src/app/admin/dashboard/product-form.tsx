@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
 import { Sparkles } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
+import { useRouter } from "next/navigation";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,6 +31,7 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
   const [isAiLoading, setIsAiLoading] = useState(false);
   const { toast } = useToast();
   const [state, formAction] = useActionState(saveProduct, { message: "", success: false });
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -66,8 +68,11 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
         description: state.message,
         variant: state.success ? "default" : "destructive",
       });
+       if (state.success) {
+        router.push('/admin/dashboard');
+      }
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   return (
     <form action={formAction} className="space-y-6">

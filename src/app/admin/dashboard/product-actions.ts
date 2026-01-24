@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const ProductSchema = z.object({
@@ -13,8 +14,16 @@ export async function saveProduct(
   prevState: { message: string, success: boolean },
   formData: FormData
 ) {
+  let id = formData.get("id");
+  const isNew = id === 'new';
+
+  if (isNew) {
+    // In a real app, you would use a more robust unique ID generation
+    id = `prod-${Math.random().toString(36).substring(2, 9)}`;
+  }
+
   const parsed = ProductSchema.safeParse({
-    id: formData.get("id"),
+    id: id,
     name: formData.get("name"),
     price: formData.get("price"),
     description: formData.get("description"),
@@ -30,9 +39,11 @@ export async function saveProduct(
   const productData = parsed.data;
 
   // In a real application, you would save this data to a database.
-  console.log("--- Saving Product ---");
+  console.log(isNew ? "--- Creating New Product ---" : "--- Updating Product ---");
   console.log(productData);
   console.log("--- Product Saved ---");
+
+  revalidatePath("/admin/dashboard");
 
   return { message: "Product saved successfully!", success: true };
 }
