@@ -6,6 +6,7 @@ import {
   Mail,
   Newspaper,
   Package,
+  Settings,
   Tag,
 } from "lucide-react";
 import Link from "next/link";
@@ -69,6 +70,13 @@ export default function DashboardLayout({
               >
                 <Mail className="h-4 w-4" />
                 Inquiries
+              </Link>
+              <Link
+                href="/admin/dashboard/settings"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Settings className="h-4 w-4" />
+                Site Settings
               </Link>
             </nav>
           </div>
