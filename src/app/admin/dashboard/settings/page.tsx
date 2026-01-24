@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function SettingsPage() {
@@ -85,7 +86,7 @@ export default function SettingsPage() {
             deleteDocumentNonBlocking(roleRef);
             toast({ title: "Admin Removed", description: `${userToUpdate.name} is no longer an admin.` });
         } else {
-            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid });
+            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid }, { merge: true });
             toast({ title: "Admin Added", description: `${userToUpdate.name} is now an admin.` });
         }
     };
@@ -104,7 +105,7 @@ export default function SettingsPage() {
         setDocumentNonBlocking(newUserDocRef, { 
             ...newUser, 
             uid: newUserDocRef.id 
-        });
+        }, { merge: true });
 
         toast({ title: 'User Added', description: `${newUser.name} has been added.` });
         setNewUser({ name: '', email: '' });
