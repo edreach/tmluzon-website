@@ -81,6 +81,29 @@ export default function Home() {
           <Button size="lg">View All Services</Button>
         </div>
 
+        <div className="mt-24 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Why choose us?
+          </h2>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+            The benefits that will make you comfort
+          </p>
+
+          <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-3">
+            {features.map((feature) => (
+              <div key={feature.title} className="flex flex-col items-center">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground">
+                  {feature.icon}
+                </div>
+                <h3 className="mt-6 text-lg font-medium">{feature.title}</h3>
+                <p className="mt-2 text-base text-muted-foreground">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+        
         <div className="mt-24 grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px]">
@@ -117,29 +140,6 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div className="mt-24 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Why choose us?
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-            The benefits that will make you comfort
-          </p>
-
-          <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-3">
-            {features.map((feature) => (
-              <div key={feature.title} className="flex flex-col items-center">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground">
-                  {feature.icon}
-                </div>
-                <h3 className="mt-6 text-lg font-medium">{feature.title}</h3>
-                <p className="mt-2 text-base text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
