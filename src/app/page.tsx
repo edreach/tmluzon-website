@@ -1,83 +1,69 @@
 import Image from "next/image";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { product, reviews } from "@/lib/data";
-import { CheckCircle, Feather, HardDrive, Zap } from "lucide-react";
-import ProductGallery from "@/components/product-gallery";
-import CustomerReviews from "@/components/customer-reviews";
-import AddToCartButton from "@/components/add-to-cart-button";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   return (
-    <div className="bg-background">
+    <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
-          <ProductGallery images={product.images} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2">
+            <Card className="relative h-[550px] w-full overflow-hidden rounded-lg shadow-lg">
+              <Image
+                src="https://picsum.photos/seed/promo-night/1200/800"
+                alt="Rainy Season Promo"
+                fill
+                className="object-cover"
+                data-ai-hint="night sky"
+              />
+              <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-8 text-white">
+                <h2 className="text-4xl font-bold">Rainy Season Promo</h2>
+                <p className="mt-2 text-lg">TM Luzon Engineering Sales & Services Company</p>
+                <p className="text-sm">Prime Asiatique Commercial Center, Buhay Na Tubig I</p>
+                <Button className="mt-4 w-fit">Read More</Button>
+              </div>
+            </Card>
+          </div>
 
-          <div className="flex flex-col gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-headline">
-                {product.name}
-              </h1>
-              <p className="text-2xl font-semibold text-primary mt-2">
-                ${product.price.toFixed(2)}
-              </p>
-              <p className="mt-4 text-muted-foreground">
-                {product.description}
-              </p>
-            </div>
-
-            <AddToCartButton product={product} />
-
-            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Features</AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-center gap-2">
-                      <Feather className="h-5 w-5 text-primary" />
-                      <span>Lightweight and durable aluminum body</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-primary" />
-                      <span>Energy-efficient LED with warm glow</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <HardDrive className="h-5 w-5 text-primary" />
-                      <span>Smart dimmer control compatible</span>
-                    </li>
-                     <li className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary" />
-                      <span>Easy to install with included kit</span>
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Specifications</AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {product.specifications.map((spec) => (
-                      <li key={spec.name}>
-                        <strong>{spec.name}:</strong> {spec.value}
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Shipping & Returns</AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-muted-foreground">
-                    Free shipping on all orders. We offer a 30-day return policy for a full refund, no questions asked.
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+          {/* Right Column */}
+          <div className="flex flex-col gap-8">
+            <Card className="relative h-[260px] w-full overflow-hidden rounded-lg shadow-lg">
+              <Image
+                src="https://picsum.photos/seed/hiring-cactus/600/400"
+                alt="We are hiring"
+                fill
+                className="object-cover"
+                data-ai-hint="cactus needles"
+              />
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4 text-white">
+                <h3 className="text-2xl font-bold">We Are Hiring</h3>
+              </div>
+            </Card>
+            <Card className="relative h-[260px] w-full overflow-hidden rounded-lg shadow-lg">
+              <Image
+                src="https://picsum.photos/seed/hiring-grass/600/400"
+                alt="We are hiring"
+                fill
+                className="object-cover"
+                data-ai-hint="grass field"
+              />
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4 text-white">
+                <h3 className="text-2xl font-bold">We Are Hiring!</h3>
+              </div>
+            </Card>
           </div>
         </div>
 
-        <CustomerReviews reviews={reviews} />
+        {/* HVAC Section */}
+        <section className="mt-16 md:mt-24 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            Comprehensive HVAC Solutions
+          </h2>
+          <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+            From installation to maintenance and emergency repairs, we offer a complete range of services to keep your systems running efficiently.
+          </p>
+        </section>
       </div>
     </div>
   );
