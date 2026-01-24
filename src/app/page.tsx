@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Award, ShieldCheck, Truck } from "lucide-react";
 
 export default function Home() {
   const services = [
@@ -23,6 +24,24 @@ export default function Home() {
       imageHint: "person light"
     }
   ];
+
+  const features = [
+    {
+      icon: <ShieldCheck className="h-6 w-6" />,
+      title: "Best quality",
+      description: "We are committed to providing the highest quality products and services to our customers.",
+    },
+    {
+      icon: <Truck className="h-6 w-6" />,
+      title: "Free shipping",
+      description: "Enjoy free shipping on all orders, with no minimum purchase required.",
+    },
+    {
+      icon: <Award className="h-6 w-6" />,
+      title: "Warranty",
+      description: "All our products come with a one-year warranty, ensuring peace of mind.",
+    },
+  ]
 
   return (
     <div className="bg-background text-foreground">
@@ -60,6 +79,29 @@ export default function Home() {
 
         <div className="mt-16 text-center">
           <Button size="lg">View All Services</Button>
+        </div>
+
+        <div className="mt-24 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Why choose us?
+          </h2>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+            The benefits that will make you comfort
+          </p>
+
+          <div className="mt-16 grid grid-cols-1 gap-y-12 gap-x-8 md:grid-cols-3">
+            {features.map((feature) => (
+              <div key={feature.title} className="flex flex-col items-center">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground">
+                  {feature.icon}
+                </div>
+                <h3 className="mt-6 text-lg font-medium">{feature.title}</h3>
+                <p className="mt-2 text-base text-muted-foreground">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
