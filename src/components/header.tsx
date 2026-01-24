@@ -24,14 +24,14 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
-      <div className="container relative flex h-16 items-center justify-between">
-        <div className="flex items-center pl-8">
+      <div className="container flex h-16 items-center">
+        <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium mx-auto">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -43,7 +43,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center justify-end space-x-2 pr-8">
+        <div className="flex items-center justify-end space-x-2">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
