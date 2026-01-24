@@ -24,10 +24,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
-      {/* The 'relative' class here is crucial. It acts as the anchor 
-        for the absolutely positioned nav element.
-      */}
-      <div className="container relative flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between">
         
         {/* LEFT: Logo */}
         <div className="flex items-center">
@@ -37,7 +34,7 @@ export default function Header() {
         </div>
         
         {/* CENTERED: Desktop Navigation */}
-        <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.label}
