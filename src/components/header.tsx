@@ -23,7 +23,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-700 bg-slate-900 text-slate-50">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center md:ml-72">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-lg">TM Luzon Logo</span>
           </Link>
