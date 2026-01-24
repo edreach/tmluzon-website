@@ -81,6 +81,44 @@ export default function Home() {
           <Button size="lg">View All Services</Button>
         </div>
 
+        <div className="mt-24 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px]">
+                <Image src="https://picsum.photos/seed/rainy-promo/1200/900" alt="Rainy Season Promo" fill className="object-cover brightness-75" data-ai-hint="night sky church" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
+                    <h2 className="text-3xl md:text-4xl font-bold">Rainy Season Promo</h2>
+                    <div className="mt-2 text-sm flex items-center flex-wrap gap-x-2">
+                        <span>TM Luzon Engineering Sales & Services Company</span>
+                        <span>&bull;</span>
+                        <span>Prime Asiatique</span>
+                    </div>
+                    <p className="text-sm mt-1">Commercial Center, Buhay Na Tubig I</p>
+                    <Button className="mt-4 w-fit">Read More</Button>
+                </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="flex flex-col gap-8">
+                {/* Top small card */}
+                <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px]">
+                    <Image src="https://picsum.photos/seed/hiring1/600/400" alt="We are hiring" fill className="object-cover brightness-75" data-ai-hint="cactus plant" />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="relative h-full flex items-end p-6 text-white">
+                        <h3 className="text-2xl font-bold">We Are Hiring</h3>
+                    </div>
+                </div>
+                {/* Bottom small card */}
+                <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px]">
+                    <Image src="https://picsum.photos/seed/hiring2/600/400" alt="We are hiring" fill className="object-cover brightness-75" data-ai-hint="grass field" />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="relative h-full flex items-end p-6 text-white">
+                        <h3 className="text-2xl font-bold">We Are Hiring!</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div className="mt-24 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Why choose us?
