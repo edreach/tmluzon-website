@@ -1,6 +1,11 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useDoc } from '@/firebase/firestore/use-doc';
+import { Button } from '@/components/ui/button';
 import {
   Briefcase,
   Info,
@@ -10,9 +15,11 @@ import {
   Package,
   Settings,
   Tag,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+  Loader2 as Loader,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function DashboardLayout({
   children,
@@ -20,10 +27,65 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+
+  // Create a memoized reference to the user's admin role document.
+  // This is more efficient than fetching the whole collection.
+  const adminRoleRef = useMemoFirebase(
+    () => (user && firestore ? doc(firestore, 'roles_admin', user.uid) : null),
+    [user, firestore]
+  );
+
+  const { data: adminRole, isLoading: isLoadingRole } = useDoc(adminRoleRef);
   
-  const handleLogout = () => {
-    router.push('/');
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+    }
+    router.push('/admin');
   };
+
+  useEffect(() => {
+    const isCheckingAuth = isUserLoading || isLoadingRole;
+    if (isCheckingAuth) {
+      return; // Wait until we have user and role information.
+    }
+
+    if (!user) {
+      // If no user is logged in, redirect to the login page.
+      router.replace('/admin');
+      return;
+    }
+
+    if (!adminRole) {
+      // If the user is logged in but doesn't have an admin role doc, they are not authorized.
+      // Sign them out and redirect them.
+      signOut(auth).then(() => {
+        router.replace('/admin?unauthorized=true');
+      });
+    }
+  }, [user, isUserLoading, adminRole, isLoadingRole, auth, router]);
+
+  const isAuthorizing = isUserLoading || isLoadingRole;
+
+  if (isAuthorizing) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader className="h-5 w-5 animate-spin" />
+          <span>Authorizing...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render the dashboard if the user is an admin.
+  // The useEffect handles the redirection, but this prevents a flicker of the UI.
+  if (!adminRole) {
+    return null;
+  }
 
   return (
     <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -104,5 +166,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-    
