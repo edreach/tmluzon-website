@@ -233,9 +233,7 @@
     }
   },
   "auth": {
-    "providers": [
-      "google"
-    ]
+    "providers": []
   },
   "firestore": {
     "structure": [
@@ -375,6 +373,6 @@
         }
       }
     ],
-    "reasoning": "Based on the requirements, the data structure prioritizes a flat structure and path-based ownership for user-generated content (customer reviews, cart items, and orders) to ensure Authorization Independence. Product data is stored in a top-level collection accessible to all users but manageable only by admins.\n\nThe structure promotes Authorization Independence by avoiding `get()` calls in security rules. Customer reviews, cart items, and orders are stored under the `/users/{userId}` path, inherently associating them with the user. This allows direct enforcement of ownership rules based on the request's `auth.uid` without needing to fetch parent documents. For the admin dashboard, a single document is used to manage the application's settings. Since only admins should have access, a document `/roles_admin/{uid}` will determine read/write privileges.\n\nThe structure supports QAPs by:\n\n1.  **Products:** Secure `list` operations on products are possible because they are stored in a top-level collection, and admin privileges are checked via a separate `/roles_admin/{uid}` document.\n2.  **User-Specific Data:** `list` operations on customer reviews, cart items, and orders are secured by the path-based ownership `/users/{userId}`, ensuring users can only access their own data.\n3.  **Settings:** Only admin users have access to the settings."
+    "reasoning": "Based on the requirements, the data structure prioritizes a flat structure and path-based ownership for user-generated content (customer reviews, cart items, and orders) to ensure Authorization Independence. Product data is stored in a top-level collection accessible to all users but manageable only by admins.\\n\\nThe structure promotes Authorization Independence by avoiding `get()` calls in security rules. Customer reviews, cart items, and orders are stored under the `/users/{userId}` path, inherently associating them with the user. This allows direct enforcement of ownership rules based on the request's `auth.uid` without needing to fetch parent documents. For the admin dashboard, a single document is used to manage the application's settings. Since only admins should have access, a document `/roles_admin/{uid}` will determine read/write privileges.\\n\\nThe structure supports QAPs by:\\n\\n1.  **Products:** Secure `list` operations on products are possible because they are stored in a top-level collection, and admin privileges are checked via a separate `/roles_admin/{uid}` document.\\n2.  **User-Specific Data:** `list` operations on customer reviews, cart items, and orders are secured by the path-based ownership `/users/{userId}`, ensuring users can only access their own data.\\n3.  **Settings:** Only admin users have access to the settings."
   }
 }
