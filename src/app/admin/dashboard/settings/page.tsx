@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import {
@@ -125,9 +126,10 @@ export default function SettingsPage() {
 
             // Inform the admin that they've been signed out.
             toast({
-                title: "Admin Action Required",
-                description: "The new user has been created and signed in. Please sign out and sign back in with your admin account to continue.",
+                title: "You have been signed out.",
+                description: "Please log back in with your admin credentials to continue.",
                 duration: 9000,
+                variant: 'destructive',
             });
 
         } catch (error: any) {
