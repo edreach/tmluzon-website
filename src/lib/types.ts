@@ -58,6 +58,7 @@ export type AdminRole = {
 
 export type SiteSettings = {
     logoUrl?: string;
+    aboutUsContent?: string;
 }
 
 export type PricelistFile = {
@@ -68,4 +69,11 @@ export type PricelistFile = {
   fileUrl: string;
 };
 
-    
+export type NewsArticle = {
+  id: string;
+  title: string;
+  date: string;
+  content: string;
+  imageUrl?: string;
+  imageHint?: string;
+};

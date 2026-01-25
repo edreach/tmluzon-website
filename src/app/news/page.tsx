@@ -1,62 +1,20 @@
+'use client';
 
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
+import Image from 'next/image';
+import { Card, CardContent } from '@/components/ui/card';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, orderBy, query } from 'firebase/firestore';
+import type { NewsArticle } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 export default function NewsPage() {
-  const newsItems = [
-    {
-      title: "WE ARE HIRING",
-      date: "October 14, 2025",
-      imageUrl: "https://picsum.photos/seed/hiring1/600/400",
-      imageHint: "office job",
-      description: null,
-    },
-    {
-      title: "WE ARE HIRING",
-      date: "October 14, 2025",
-      imageUrl: "https://picsum.photos/seed/hiring2/600/400",
-      imageHint: "team meeting",
-      description: null,
-    },
-    {
-      title: "WE ARE HIRING",
-      date: "October 14, 2025",
-      imageUrl: "https://picsum.photos/seed/hiring3/600/400",
-      imageHint: "developer coding",
-      description: null,
-    },
-    {
-      title: "We Are Hiring",
-      date: "September 25, 2025",
-      imageUrl: "https://picsum.photos/seed/hiring4/600/400",
-      imageHint: "resume application",
-      description: "URGENT HIRING !!! THOSE WHO ARE INTERESTED, SEE DETAILS BELOW. OR SEND YOU'RE CV DIRECLTY TO; t.m.luzon.aircon@gmail.com OR CALL US @...",
-    },
-    {
-      title: "We Are Hiring!",
-      date: "September 25, 2025",
-      imageUrl: "https://picsum.photos/seed/hiring5/600/400",
-      imageHint: "job interview",
-      description: "URGENT HIRING !!! THOSE WHO ARE INTERESTED, SEE DETAILS BELOW. OR SEND YOU'RE CV DIRECLTY TO; t.m.luzon.aircon@gmail.com OR CALL US @...",
-    },
-    {
-      title: "Rainy Season Promo",
-      date: "September 25, 2025",
-      imageUrl: "https://picsum.photos/seed/rainy-promo-news/600/400",
-      imageHint: "rainy day",
-      description: (
-        <>
-          <p>TM Luzon Engineering Sales &amp; Services Company</p>
-          <p className="flex items-start gap-2 mt-2">
-            <MapPin className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
-            <span>Prime Asiatique Commercial Center, Buhay Na Tubig Imus, Cavite</span>
-          </p>
-          <p className="mt-1 pl-6">046-5316307,046-4580686 /0923-593...</p>
-        </>
-      ),
-    },
-  ];
+  const firestore = useFirestore();
+  const newsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'news'), orderBy('date', 'desc')) : null),
+    [firestore]
+  );
+  const { data: newsItems, isLoading } = useCollection<NewsArticle>(newsQuery);
 
   return (
     <div className="bg-background text-foreground">
@@ -71,28 +29,49 @@ export default function NewsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {newsItems.map((item, index) => (
-            <Card key={index} className="overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
-              <div className="relative w-full h-48 bg-muted">
-                <Image
-                  src={item.imageUrl}
-                  alt={item.title}
-                  fill
-                  className="object-cover"
-                  data-ai-hint={item.imageHint}
-                />
-              </div>
+          {isLoading && (
+            Array.from({length: 6}).map((_, index) => (
+                <Card key={index} className="overflow-hidden rounded-lg shadow-sm flex flex-col">
+                    <Skeleton className="h-48 w-full"/>
+                    <CardContent className="p-6 flex flex-col flex-grow">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2 mt-2" />
+                        <Skeleton className="h-4 w-full mt-4" />
+                        <Skeleton className="h-4 w-full mt-2" />
+                    </CardContent>
+                </Card>
+            ))
+          )}
+
+          {!isLoading && newsItems?.map((item) => (
+            <Card key={item.id} className="overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+              {item.imageUrl && (
+                <div className="relative w-full h-48 bg-muted">
+                    <Image
+                    src={item.imageUrl}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={item.imageHint}
+                    />
+                </div>
+              )}
               <CardContent className="p-6 flex flex-col flex-grow">
                 <h3 className="text-lg font-bold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{item.date}</p>
-                {item.description && (
-                  <div className="text-sm text-muted-foreground mt-4 flex-grow">
-                    {item.description}
-                  </div>
-                )}
+                <p className="text-sm text-muted-foreground mt-1">
+                  {format(new Date(item.date), 'MMMM d, yyyy')}
+                </p>
+                <div className="text-sm text-muted-foreground mt-4 flex-grow" dangerouslySetInnerHTML={{ __html: item.content.replace(/\n/g, '<br />') }} />
               </CardContent>
             </Card>
           ))}
+
+          {!isLoading && newsItems?.length === 0 && (
+            <p className='text-center text-muted-foreground md:col-span-2 lg:col-span-3'>
+                No news articles have been posted yet.
+            </p>
+          )}
+
         </div>
       </div>
     </div>
