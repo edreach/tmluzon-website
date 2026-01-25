@@ -59,3 +59,13 @@ export type AdminRole = {
 export type SiteSettings = {
     logoUrl?: string;
 }
+
+export type PricelistFile = {
+  id: string;
+  brand: string;
+  title: string;
+  fileName: string;
+  fileUrl: string;
+};
+
+    
