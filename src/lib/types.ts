@@ -92,3 +92,11 @@ export type NewsArticle = {
   imageUrl?: string;
   imageHint?: string;
 };
+
+export type Brand = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  websiteUrl?: string;
+  imageHint?: string;
+};

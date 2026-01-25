@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Briefcase,
+  Building2,
   Info,
   LogOut,
   Mail,
@@ -63,6 +64,13 @@ export default function DashboardLayout({
               >
                 <Tag className="h-4 w-4" />
                 Pricelist
+              </Link>
+               <Link
+                href="/admin/dashboard/brands"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Building2 className="h-4 w-4" />
+                Brands
               </Link>
               <Link
                 href="/admin/dashboard/about-us"

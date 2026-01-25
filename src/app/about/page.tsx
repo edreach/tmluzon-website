@@ -1,11 +1,12 @@
 'use client';
 
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import type { SiteSettings, AboutUsContent } from '@/lib/types';
+import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
+import type { SiteSettings, AboutUsContent, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const defaultContent: AboutUsContent = {
   intro_p1:
@@ -36,25 +37,22 @@ const defaultContent: AboutUsContent = {
 
 export default function AboutPage() {
   const firestore = useFirestore();
+  
   const settingsRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null),
     [firestore]
   );
-  const { data: siteSettings, isLoading } = useDoc<SiteSettings>(settingsRef);
+  const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
   
-  const content = siteSettings?.aboutUsContent || defaultContent;
+  const brandsQuery = useMemoFirebase(
+      () => (firestore ? collection(firestore, 'brands') : null),
+      [firestore]
+  );
+  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
 
-  const brandLogos = [
-    { src: 'https://picsum.photos/seed/brand1/150/100', alt: 'Brand 1', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand2/150/100', alt: 'Brand 2', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand3/150/100', alt: 'Brand 3', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand4/150/100', alt: 'Brand 4', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand5/150/100', alt: 'Brand 5', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand6/150/100', alt: 'Brand 6', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand7/150/100', alt: 'Brand 7', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand8/150/100', alt: 'Brand 8', hint: 'logo design' },
-    { src: 'https://picsum.photos/seed/brand9/150/100', alt: 'Brand 9', hint: 'logo design' },
-  ];
+  const content = siteSettings?.aboutUsContent || defaultContent;
+  const isLoading = isLoadingSettings || isLoadingBrands;
+
 
   if (isLoading) {
       return (
@@ -156,14 +154,22 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold tracking-tight mb-4">Our Brands</h2>
             <p className="text-muted-foreground text-lg mb-8">We work with the best brands.</p>
             <div className="grid grid-cols-3 gap-4">
-              {brandLogos.map((logo, index) => (
-                <div
-                  key={index}
-                  className="relative aspect-[3/2] bg-background rounded-lg flex items-center justify-center p-2 shadow-sm"
-                >
-                  <Image src={logo.src} alt={logo.alt} fill className="object-contain p-2" data-ai-hint={logo.hint} />
+              {brands?.map((brand) => (
+                <div key={brand.id}>
+                  {brand.websiteUrl ? (
+                    <a href={brand.websiteUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-[3/2] bg-background rounded-lg flex items-center justify-center p-2 shadow-sm hover:shadow-md transition-shadow">
+                      <Image src={brand.logoUrl} alt={brand.name} fill className="object-contain p-2" data-ai-hint={brand.imageHint} />
+                    </a>
+                  ) : (
+                    <div className="relative aspect-[3/2] bg-background rounded-lg flex items-center justify-center p-2 shadow-sm">
+                      <Image src={brand.logoUrl} alt={brand.name} fill className="object-contain p-2" data-ai-hint={brand.imageHint} />
+                    </div>
+                  )}
                 </div>
               ))}
+              {!brands?.length && !isLoading && (
+                  <p className="col-span-3 text-center text-muted-foreground">No brands have been added yet.</p>
+              )}
             </div>
           </div>
         </div>

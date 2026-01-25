@@ -333,6 +333,20 @@
         "fileUrl"
       ]
     },
+    "Brand": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Brand",
+      "type": "object",
+      "description": "Represents a brand partner, featured on the About Us page.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "logoUrl": { "type": "string", "format": "uri" },
+        "websiteUrl": { "type": "string", "format": "uri" },
+        "imageHint": { "type": "string" }
+      },
+      "required": ["name", "logoUrl"]
+    },
     "NewsArticle": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "NewsArticle",
@@ -535,6 +549,22 @@
             {
               "name": "pricelistId",
               "description": "The unique identifier for the pricelist."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/brands/{brandId}",
+        "definition": {
+          "entityName": "Brand",
+          "schema": {
+            "$ref": "#/backend/entities/Brand"
+          },
+          "description": "Stores brand partners displayed on the website. Admins can manage these.",
+          "params": [
+            {
+              "name": "brandId",
+              "description": "The unique identifier for the brand."
             }
           ]
         }
