@@ -17,6 +17,7 @@ import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { z } from "zod";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -40,6 +41,7 @@ const ProductFormSchema = z.object({
   subType: z.string().min(2, "Sub-type must be at least 2 characters."),
   imageUrls: z.array(z.string().url()).min(1, "At least one image is required."),
   specifications: z.array(z.object({ name: z.string(), value: z.string()})).optional(),
+  discontinued: z.boolean().default(false),
 });
 
 
@@ -229,6 +231,21 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
          <div className="space-y-2 md:col-span-2">
             <Label htmlFor="subType">Sub-Type</Label>
             <Input id="subType" name="subType" value={product.subType || ''} onChange={handleInputChange} />
+        </div>
+        <div className="flex items-center space-x-2 md:col-span-2">
+          <Checkbox
+            id="discontinued"
+            checked={product.discontinued || false}
+            onCheckedChange={(checked) => {
+              setProduct(prev => ({...prev, discontinued: checked === true}));
+            }}
+          />
+          <label
+            htmlFor="discontinued"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Discontinue this product (it will not be shown on the public site)
+          </label>
         </div>
       </div>
       

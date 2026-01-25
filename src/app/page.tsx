@@ -1,3 +1,5 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,9 +12,19 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { productListings } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
+    [firestore]
+  );
+  const { data: productListings, isLoading } = useCollection<Product>(productsQuery);
+
   const services = [
     {
       title: "Fast & Reliable Aircon Repair",
@@ -168,30 +180,47 @@ export default function Home() {
               className="w-full max-w-6xl mx-auto"
             >
               <CarouselContent>
-                {productListings.slice(0, 8).map((product) => (
-                  <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                    <div className="p-1 h-full">
-                      <Card className="overflow-hidden flex flex-col h-full">
-                        <div className="relative w-full h-48 bg-muted">
-                          <Image
-                            src={product.imageUrls[0] || `https://picsum.photos/seed/${product.id}/400/400`}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                            data-ai-hint="hvac unit"
-                          />
-                        </div>
-                        <CardContent className="p-4 text-center flex flex-col flex-grow">
-                          <h3 className="font-semibold text-sm h-10 truncate flex-grow" title={product.name}>{product.name}</h3>
-                          <p className="text-xs text-muted-foreground uppercase">{product.subType}</p>
-                          <Button asChild size="sm" className="mt-4">
-                            <Link href="/products">View Details</Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <CarouselItem key={i} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <div className="p-1 h-full">
+                        <Card className="overflow-hidden flex flex-col h-full">
+                          <Skeleton className="h-48 w-full" />
+                          <CardContent className="p-4 text-center flex flex-col flex-grow">
+                            <Skeleton className="h-4 w-3/4 mx-auto mb-2" />
+                            <Skeleton className="h-3 w-1/2 mx-auto" />
+                            <Skeleton className="h-9 w-24 mx-auto mt-4" />
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))
+                ) : (
+                  (productListings || []).slice(0, 8).map((product) => (
+                    <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <div className="p-1 h-full">
+                        <Card className="overflow-hidden flex flex-col h-full">
+                          <div className="relative w-full h-48 bg-muted">
+                            <Image
+                              src={product.imageUrls?.[0] || `https://picsum.photos/seed/${product.id}/400/400`}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                              data-ai-hint="hvac unit"
+                            />
+                          </div>
+                          <CardContent className="p-4 text-center flex flex-col flex-grow">
+                            <h3 className="font-semibold text-sm h-10 truncate flex-grow" title={product.name}>{product.name}</h3>
+                            <p className="text-xs text-muted-foreground uppercase">{product.subType}</p>
+                            <Button asChild size="sm" className="mt-4">
+                              <Link href="/products">View Details</Link>
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))
+                )}
               </CarouselContent>
               <CarouselPrevious className="-left-4 md:-left-12" />
               <CarouselNext className="-right-4 md:-right-12" />

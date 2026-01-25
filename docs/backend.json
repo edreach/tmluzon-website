@@ -51,6 +51,10 @@
         "subType": {
           "type": "string",
           "description": "The sub-type of the product (e.g., Indoor, Outdoor)."
+        },
+        "discontinued": {
+          "type": "boolean",
+          "description": "Whether the product is discontinued and should not be displayed on the public site."
         }
       },
       "required": [

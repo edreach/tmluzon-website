@@ -13,6 +13,7 @@ export default function NewProductPage() {
       subType: '',
       imageUrls: [],
       specifications: [],
+      discontinued: false,
   }
 
   return (

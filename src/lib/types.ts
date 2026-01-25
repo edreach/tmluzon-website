@@ -20,6 +20,7 @@ export type Product = {
   type: string;
   brand: string;
   subType: string;
+  discontinued?: boolean;
 };
 
 export type Review = {

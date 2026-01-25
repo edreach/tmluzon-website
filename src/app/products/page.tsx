@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Select,
   SelectContent,
@@ -13,20 +14,38 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LayoutGrid, List } from 'lucide-react';
-import { productListings as allProducts } from '@/lib/data';
 import type { Product } from '@/lib/types';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductsPage() {
-  const [products, setProducts] = React.useState<Product[]>(allProducts);
+  const firestore = useFirestore();
+
+  // Fetch products that are not discontinued
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
+    [firestore]
+  );
+  const { data: allProducts, isLoading } = useCollection<Product>(productsQuery);
+  
+  const [products, setProducts] = React.useState<Product[]>([]);
   const [view, setView] = React.useState('grid');
   
-  const maxPrice = React.useMemo(() => Math.max(...allProducts.map(p => p.price), 100000), []);
+  const maxPrice = React.useMemo(() => {
+      if (!allProducts || allProducts.length === 0) return 100000;
+      return Math.max(...allProducts.map(p => p.price), 100000);
+  }, [allProducts]);
   const [priceRange, setPriceRange] = React.useState([0, maxPrice]);
 
+  React.useEffect(() => {
+    setPriceRange([0, maxPrice]);
+  }, [maxPrice]);
+
   // Get unique values for filters
-  const brands = ['All Brands', ...Array.from(new Set(allProducts.map((p) => p.brand)))];
-  const types = ['All Types', ...Array.from(new Set(allProducts.map((p) => p.type)))];
-  const subTypes = ['All Sub-Types', ...Array.from(new Set(allProducts.map((p) => p.subType)))];
+  const brands = React.useMemo(() => ['All Brands', ...Array.from(new Set((allProducts || []).map((p) => p.brand)))], [allProducts]);
+  const types = React.useMemo(() => ['All Types', ...Array.from(new Set((allProducts || []).map((p) => p.type)))], [allProducts]);
+  const subTypes = React.useMemo(() => ['All Sub-Types', ...Array.from(new Set((allProducts || []).map((p) => p.subType)))], [allProducts]);
 
   // state for filters
   const [brand, setBrand] = React.useState('All Brands');
@@ -35,7 +54,7 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = React.useState('popularity');
 
   React.useEffect(() => {
-    let filtered = allProducts;
+    let filtered = allProducts || [];
 
     if (brand !== 'All Brands') {
       filtered = filtered.filter((p) => p.brand === brand);
@@ -62,7 +81,7 @@ export default function ProductsPage() {
     });
 
     setProducts(sorted);
-  }, [brand, type, subType, priceRange, sortBy]);
+  }, [brand, type, subType, priceRange, sortBy, allProducts]);
   
   const itemsPerPage = 16;
   const totalResults = products.length;
@@ -175,21 +194,37 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.slice(0, itemsPerPage).map((product) => (
-                <Card key={product.id} className="overflow-hidden group">
-                  <div className="bg-muted h-48 flex items-center justify-center text-muted-foreground relative">
-                    No Image
-                  </div>
-                  <CardContent className="p-4 bg-white">
-                    <h3 className="font-semibold text-sm truncate text-slate-800">{product.name}</h3>
-                    <ul className="mt-1 text-xs text-muted-foreground list-disc pl-4">
-                        <li>{product.description}</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="h-48 w-full" />
+                    <CardContent className="p-4">
+                      <Skeleton className="h-4 w-3/4 mb-2" />
+                      <Skeleton className="h-3 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.slice(0, itemsPerPage).map((product) => (
+                  <Card key={product.id} className="overflow-hidden group">
+                    <div className="bg-muted h-48 flex items-center justify-center text-muted-foreground relative">
+                       {product.imageUrls && product.imageUrls.length > 0 ? (
+                        <Image src={product.imageUrls[0]} alt={product.name} fill className="object-cover" />
+                      ) : (
+                        <span>No Image</span>
+                      )}
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-sm truncate">{product.name}</h3>
+                      <p className="mt-1 text-xs text-muted-foreground truncate">{product.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </main>
         </div>
       </div>
