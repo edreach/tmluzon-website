@@ -233,10 +233,7 @@
     }
   },
   "auth": {
-    "providers": [
-      "google.com",
-      "password"
-    ]
+    "providers": []
   },
   "firestore": {
     "structure": [
