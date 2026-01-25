@@ -56,9 +56,24 @@ export type AdminRole = {
     uid: string;
 }
 
+export type AboutUsContent = {
+  intro_p1: string;
+  intro_p2: string;
+  intro_p3: string;
+  overview_p1: string;
+  service_consultation: string;
+  service_supply: string;
+  service_supply_list: string; // newlines
+  service_installation: string;
+  service_maintenance: string;
+  statement_purpose: string;
+  statement_vision: string;
+  statement_mission: string;
+};
+
 export type SiteSettings = {
     logoUrl?: string;
-    aboutUsContent?: string;
+    aboutUsContent?: AboutUsContent;
 }
 
 export type PricelistFile = {

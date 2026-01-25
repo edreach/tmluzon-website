@@ -278,8 +278,22 @@
           "format": "uri"
         },
         "aboutUsContent": {
-          "type": "string",
-          "description": "The content for the public About Us page."
+          "type": "object",
+          "description": "Structured content for the About Us page.",
+          "properties": {
+            "intro_p1": { "type": "string" },
+            "intro_p2": { "type": "string" },
+            "intro_p3": { "type": "string" },
+            "overview_p1": { "type": "string" },
+            "service_consultation": { "type": "string" },
+            "service_supply": { "type": "string" },
+            "service_supply_list": { "type": "string" },
+            "service_installation": { "type": "string" },
+            "service_maintenance": { "type": "string" },
+            "statement_purpose": { "type": "string" },
+            "statement_vision": { "type": "string" },
+            "statement_mission": { "type": "string" }
+          }
         }
       },
       "required": []
