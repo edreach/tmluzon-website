@@ -18,18 +18,15 @@ export default function AboutPage() {
   return (
     <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-16 sm:py-24 max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">
-            Overview
-          </h1>
-        </div>
-
         <div className="max-w-4xl mx-auto">
             <div className="text-center">
-                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">
+                    Overview
+                </h1>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
                     T.M. LUZON ENGINEERING SALES & SERVICES COMPANY
                 </h2>
-                <p className="mt-4 text-md text-muted-foreground">
+                <p className="mt-2 text-md text-muted-foreground">
                     (also Known as T.M. Luzon Airconditioning & Refrigeration Repair & Services)
                 </p>
             </div>
