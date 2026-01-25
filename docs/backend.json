@@ -66,6 +66,35 @@
         "subType"
       ]
     },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Represents a service offered by TMLUZON.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the service."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the service."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the service."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the service."
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "price"
+      ]
+    },
     "CustomerReview": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "CustomerReview",
@@ -272,6 +301,22 @@
             {
               "name": "productId",
               "description": "The unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Stores services offered.",
+          "params": [
+            {
+              "name": "serviceId",
+              "description": "The unique identifier for the service."
             }
           ]
         }

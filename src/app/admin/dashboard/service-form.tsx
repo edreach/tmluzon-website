@@ -1,37 +1,40 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { saveService } from "./service-actions";
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Service } from "@/lib/types";
 import { Sparkles } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Saving..." : "Save Service"}
-    </Button>
-  );
-}
+import { useFirestore } from "@/firebase";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { z } from "zod";
 
 interface ServiceFormProps {
   service: Service;
 }
 
+const ServiceFormSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters."),
+  price: z.coerce.number().positive("Price must be a positive number."),
+  description: z.string().min(10, "Description must be at least 10 characters."),
+});
+
 export default function ServiceForm({ service: initialService }: ServiceFormProps) {
   const [service, setService] = useState(initialService);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  const [state, formAction] = useActionState(saveService, { message: "", success: false });
   const router = useRouter();
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    setService(initialService);
+  }, [initialService]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -61,22 +64,63 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
     }
   };
 
-  useEffect(() => {
-    if (state.message) {
-      toast({
-        title: state.success ? "Success" : "Error",
-        description: state.message,
-        variant: state.success ? "default" : "destructive",
-      });
-       if (state.success) {
-        router.push('/admin/dashboard/services');
-      }
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    if (!firestore) {
+        toast({ title: 'Error', description: 'Firestore is not available.', variant: 'destructive' });
+        setIsSaving(false);
+        return;
     }
-  }, [state, toast, router]);
+
+    const serviceToValidate = {
+        ...service,
+        price: Number(service.price) || 0,
+    };
+
+    const parsed = ServiceFormSchema.safeParse(serviceToValidate);
+
+    if (!parsed.success) {
+      toast({
+        title: "Validation Error",
+        description: parsed.error.errors.map((e) => e.message).join(", "),
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+
+    try {
+      const isNew = service.id === 'new';
+      
+      if (isNew) {
+        await addDoc(collection(firestore, 'services'), parsed.data);
+      } else {
+        await setDoc(doc(firestore, 'services', service.id), parsed.data);
+      }
+      
+      toast({
+          title: 'Service Saved',
+          description: 'Your service has been saved successfully.',
+      });
+
+      router.push('/admin/dashboard/services');
+
+    } catch (error: any) {
+        console.error("Error saving service: ", error);
+        toast({
+            title: 'Save Error',
+            description: error.message || 'An unexpected error occurred.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
-      <input type="hidden" name="id" value={service.id} />
+    <form onSubmit={handleSave} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Service Name</Label>
         <Input id="name" name="name" value={service.name} onChange={handleInputChange} />
@@ -99,7 +143,9 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
             {isAiLoading ? 'Enhancing...' : 'Enhance with AI'}
         </Button>
       </div>
-      <SubmitButton />
+      <Button type="submit" disabled={isSaving}>
+        {isSaving ? "Saving..." : "Save Service"}
+      </Button>
     </form>
   );
 }

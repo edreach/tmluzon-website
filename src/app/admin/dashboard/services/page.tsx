@@ -18,7 +18,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { serviceListings as allServices } from "@/lib/data";
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
     DropdownMenu,
@@ -27,17 +26,37 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Service } from '@/lib/types';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function ServicesPage() {
-    const [itemsPerPage, setItemsPerPage] = React.useState(10);
-    const [paginatedServices, setPaginatedServices] = React.useState<Service[]>([]);
+    const firestore = useFirestore();
+    const { toast } = useToast();
 
-    React.useEffect(() => {
-        setPaginatedServices(allServices.slice(0, itemsPerPage));
-    }, [itemsPerPage]);
+    const servicesQuery = useMemoFirebase(
+        () => (firestore ? collection(firestore, 'services') : null),
+        [firestore]
+    );
+    const { data: services, isLoading } = useCollection<Service>(servicesQuery);
+
+    const handleDelete = (serviceId: string) => {
+        if (!firestore || !serviceId) return;
+        if (confirm('Are you sure you want to delete this service?')) {
+            deleteDoc(doc(firestore, 'services', serviceId))
+                .then(() => {
+                    toast({ title: 'Service Deleted', description: 'The service has been successfully removed.' });
+                })
+                .catch((error) => {
+                    console.error("Error deleting document: ", error);
+                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the service.' });
+                });
+        }
+    };
+
 
     return (
         <>
@@ -53,23 +72,10 @@ export default function ServicesPage() {
                 </div>
             </div>
             <Card>
-                 <CardHeader className="flex-row items-center justify-between">
+                 <CardHeader>
                     <div>
                         <CardTitle>Service Catalog</CardTitle>
                         <CardDescription>Manage your services here.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm text-muted-foreground whitespace-nowrap">Show items:</label>
-                        <Select value={String(itemsPerPage)} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                            <SelectTrigger className="w-[80px]">
-                                <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="30">30</SelectItem>
-                                <SelectItem value="50">50</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -85,7 +91,17 @@ export default function ServicesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedServices.map((service) => (
+                            {isLoading && (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                            {!isLoading && services?.map((service) => (
                                 <TableRow key={service.id}>
                                     <TableCell className="font-medium">{service.name}</TableCell>
                                     <TableCell>{service.description.substring(0, 100)}...</TableCell>
@@ -102,7 +118,7 @@ export default function ServicesPage() {
                                                 <DropdownMenuItem asChild>
                                                    <Link href={`/admin/dashboard/services/${service.id}/edit`}>Edit</Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive">
+                                                <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(service.id)}>
                                                     Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
@@ -110,6 +126,11 @@ export default function ServicesPage() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                             {!isLoading && services?.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center h-24">No services found.</TableCell>
+                                </TableRow>
+                             )}
                         </TableBody>
                     </Table>
                 </CardContent>

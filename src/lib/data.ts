@@ -89,8 +89,4 @@ export const productListings: Product[] = [
   { id: 'prod-16', name: 'AC024BXPDKC/TC', description: 'INDOOR FLOOR MOUNTED 2HP', price: 63000, brand: 'Samsung', type: 'Floor Mounted', subType: 'Indoor', imageUrls: [], specifications: [] },
 ];
 
-export const serviceListings: Service[] = [
-  { id: 'serv-1', name: 'Fast & Reliable Aircon Repair', price: 1500, description: 'Facing a broken AC? Our certified technicians provide fast, expert repair for any aircon problem, offering honest, long-lasting solutions with transparent pricing ...' },
-  { id: 'serv-2', name: 'Expert Aircon Maintenance', price: 800, description: 'Invest in worry-free comfort with our Aircon Preventive Maintenance Service. We restore peak efficiency, lower energy costs, and prevent costly breakdowns through...' },
-  { id: 'serv-3', name: 'AC Planning, Design & Installation', price: 25000, description: 'Our integrated service provides expert planning, design, and installation of highly efficient cooling systems for new homes and major renovations. We ensure...' },
-];
+export const serviceListings: Service[] = [];
