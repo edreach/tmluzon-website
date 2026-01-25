@@ -43,9 +43,14 @@ export default function AdminLoginPage() {
       router.push('/admin/dashboard');
     } catch (error: any) {
       console.error('Email Sign-In Error:', error);
+      const description =
+        error.code === 'auth/invalid-credential'
+          ? 'Invalid email or password. Please check your credentials and try again.'
+          : error.message || 'An unknown error occurred during sign-in.';
+
       toast({
         title: 'Sign-In Failed',
-        description: error.message || 'Invalid credentials. Please try again.',
+        description,
         variant: 'destructive',
       });
     } finally {
