@@ -1,3 +1,4 @@
+import { Separator } from "@/components/ui/separator";
 
 export default function AboutPage() {
   return (
@@ -41,6 +42,51 @@ export default function AboutPage() {
                 </p>
             </div>
         </div>
+
+        <Separator className="my-16" />
+        
+        <div className="max-w-4xl mx-auto text-left">
+             <p className="text-lg text-muted-foreground">
+                We specialize in the supply, installation, and maintenance of high-quality air-conditioning systems for residential, commercial, and industrial clients. Our goal is to provide energy-efficient, cost-effective cooling solutions tailored to meet the unique needs of every customer.
+            </p>
+
+            <h3 className="text-2xl font-bold tracking-tight mt-12 mb-6 text-foreground">Our Services Include:</h3>
+
+            <div className="space-y-8 text-lg">
+                <div>
+                    <h4 className="font-bold text-xl text-foreground">-Consultation and Site Assessment</h4>
+                    <p className="mt-2 text-muted-foreground">
+                        We begin with a detailed on-site evaluation to understand your cooling requirements, building layout, and budget. Our experts will recommend the best air-conditioning system to ensure optimal performance and efficiency.
+                    </p>
+                </div>
+                <div>
+                    <h4 className="font-bold text-xl text-foreground">-Air-Conditioner Supply</h4>
+                    <p className="mt-2 text-muted-foreground">
+                        We supply a wide range of reliable, high-performance air-conditioning units from leading brands such as Daikin, LG, Samsung, Mitsubishi Electric, Carrier, and more. Options include:
+                    </p>
+                    <ul className="list-disc list-inside mt-4 pl-4 text-muted-foreground space-y-2">
+                        <li>Split systems</li>
+                        <li>Ducted systems</li>
+                        <li>VRF/VRV systems</li>
+                        <li>Window units</li>
+                        <li>Portable AC units</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-bold text-xl text-foreground">-Professional Installation</h4>
+                    <p className="mt-2 text-muted-foreground">
+                        Our certified technicians carry out all installations to the highest industry standards, ensuring safety, performance, and compliance with all local regulations. We handle electrical connections, ductwork, piping, and mounting with precision.
+                    </p>
+                </div>
+                <div>
+                    <h4 className="font-bold text-xl text-foreground">-Maintenance & Repairs</h4>
+                    <p className="mt-2 text-muted-foreground">
+                        We offer ongoing maintenance contracts to ensure your system runs efficiently all year round. We also provide fast and reliable repair services for all major AC brands.
+                    </p>
+                </div>
+            </div>
+        </div>
+
       </div>
     </div>
   );
