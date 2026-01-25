@@ -8,6 +8,7 @@ export default function NewProductPage() {
       name: '',
       price: 0,
       description: '',
+      type: '',
       images: [],
       specifications: [],
   }

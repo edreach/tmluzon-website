@@ -17,6 +17,7 @@ export type Product = {
   description: string;
   images: ImagePlaceholder[];
   specifications: Specification[];
+  type: string;
 };
 
 export type Review = {

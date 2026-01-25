@@ -8,6 +8,8 @@ const ProductSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   price: z.coerce.number().positive("Price must be a positive number."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  type: z.string().min(2, "Type must be at least 2 characters."),
+  imageUrls: z.string().optional(),
 });
 
 export async function saveProduct(
@@ -27,6 +29,8 @@ export async function saveProduct(
     name: formData.get("name"),
     price: formData.get("price"),
     description: formData.get("description"),
+    type: formData.get("type"),
+    imageUrls: formData.get("imageUrls"),
   });
 
   if (!parsed.success) {
@@ -36,11 +40,14 @@ export async function saveProduct(
     };
   }
 
-  const productData = parsed.data;
+  const { imageUrls, ...productData } = parsed.data;
+  const urls = imageUrls ? JSON.parse(imageUrls) : [];
+
 
   // In a real application, you would save this data to a database.
   console.log(isNew ? "--- Creating New Product ---" : "--- Updating Product ---");
   console.log(productData);
+  console.log("Image URLs:", urls);
   console.log("--- Product Saved ---");
 
   revalidatePath("/admin/dashboard");

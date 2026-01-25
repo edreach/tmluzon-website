@@ -17,6 +17,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       name: productListing.name,
       price: productListing.price,
       description: productListing.description,
+      type: productListing.type,
       images: [], 
       specifications: [],
   }

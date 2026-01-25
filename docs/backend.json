@@ -31,9 +31,9 @@
           "type": "number",
           "description": "The price of the product."
         },
-        "category": {
+        "type": {
           "type": "string",
-          "description": "The category the product belongs to."
+          "description": "The type of the product (e.g., Wall Mounted, Floor Mounted)."
         }
       },
       "required": [
@@ -43,7 +43,7 @@
         "specifications",
         "imageUrl",
         "price",
-        "category"
+        "type"
       ]
     },
     "CustomerReview": {
@@ -233,7 +233,10 @@
     }
   },
   "auth": {
-    "providers": []
+    "providers": [
+      "google.com",
+      "password"
+    ]
   },
   "firestore": {
     "structure": [
