@@ -87,9 +87,9 @@ export default function AboutPage() {
             (also Known as T.M. Luzon Airconditioning & Refrigeration Repair & Services)
           </p>
           <div className="mt-8 space-y-6 text-muted-foreground text-lg text-left">
-            <p>{content.intro_p1}</p>
-            <p>{content.intro_p2}</p>
-            <p>{content.intro_p3}</p>
+            <p className="whitespace-pre-wrap">{content.intro_p1}</p>
+            <p className="whitespace-pre-wrap">{content.intro_p2}</p>
+            <p className="whitespace-pre-wrap">{content.intro_p3}</p>
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export default function AboutPage() {
               Overview
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground">{content.overview_p1}</p>
+          <p className="text-lg text-muted-foreground whitespace-pre-wrap">{content.overview_p1}</p>
 
           <h3 className="text-2xl font-bold tracking-tight mt-12 mb-6 text-foreground">
             Our Services Include:
@@ -110,22 +110,22 @@ export default function AboutPage() {
           <div className="space-y-8 text-lg">
             <div>
               <h4 className="font-bold text-xl text-foreground">-Consultation and Site Assessment</h4>
-              <p className="mt-2 text-muted-foreground">{content.service_consultation}</p>
+              <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{content.service_consultation}</p>
             </div>
             <div>
               <h4 className="font-bold text-xl text-foreground">-Air-Conditioner Supply</h4>
-              <p className="mt-2 text-muted-foreground">{content.service_supply}</p>
+              <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{content.service_supply}</p>
               <ul className="list-disc list-inside mt-4 pl-4 text-muted-foreground space-y-2">
                 {content.service_supply_list.split('\n').map((item, i) => <li key={i}>{item}</li>)}
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-xl text-foreground">-Professional Installation</h4>
-              <p className="mt-2 text-muted-foreground">{content.service_installation}</p>
+              <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{content.service_installation}</p>
             </div>
             <div>
               <h4 className="font-bold text-xl text-foreground">-Maintenance & Repairs</h4>
-              <p className="mt-2 text-muted-foreground">{content.service_maintenance}</p>
+              <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{content.service_maintenance}</p>
             </div>
           </div>
         </div>
@@ -138,15 +138,15 @@ export default function AboutPage() {
             <div className="space-y-6 text-muted-foreground text-lg">
               <div>
                 <h4 className="text-xl font-bold text-foreground">Purpose:</h4>
-                <p>{content.statement_purpose}</p>
+                <p className="whitespace-pre-wrap">{content.statement_purpose}</p>
               </div>
               <div>
                 <h4 className="text-xl font-bold text-foreground">Vision:</h4>
-                <p>{content.statement_vision}</p>
+                <p className="whitespace-pre-wrap">{content.statement_vision}</p>
               </div>
               <div>
                 <h4 className="text-xl font-bold text-foreground">Mission Statement:</h4>
-                <p>{content.statement_mission}</p>
+                <p className="whitespace-pre-wrap">{content.statement_mission}</p>
               </div>
             </div>
           </div>

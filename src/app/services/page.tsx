@@ -1,28 +1,20 @@
+'use client';
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
+import type { Service } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServicesPage() {
-  const services = [
-    {
-      title: "Fast & Reliable Aircon Repair",
-      description: "Facing a broken AC? Our certified technicians provide fast, expert repair for any aircon problem, offering honest, long-lasting solutions with transparent pricing...",
-      imageUrl: "https://picsum.photos/seed/aircon-repair/600/400",
-      imageHint: "person sunset"
-    },
-    {
-      title: "Keep Your Cool & Lower Your Bills: Expert Aircon Maintenance",
-      description: "Invest in worry-free comfort with our Aircon Preventive Maintenance Service. We restore peak efficiency, lower energy costs, and prevent costly breakdowns through...",
-      imageUrl: "https://picsum.photos/seed/aircon-maintenance/600/400",
-      imageHint: "person field"
-    },
-    {
-      title: "The Ultimate Cooling Solution: Expert AC Planning, Design & Installation",
-      description: "Our integrated service provides expert planning, design, and installation of highly efficient cooling systems for new homes and major renovations in Bacoor. We ensure...",
-      imageUrl: "https://picsum.photos/seed/aircon-install/600/400",
-      imageHint: "person light"
-    }
-  ];
+  const firestore = useFirestore();
+  const servicesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'services')) : null),
+    [firestore]
+  );
+  const { data: services, isLoading } = useCollection<Service>(servicesQuery);
 
   return (
     <div className="bg-background text-foreground">
@@ -37,26 +29,43 @@ export default function ServicesPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.title} className="overflow-hidden rounded-xl shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col">
-              <div className="relative w-full h-48">
+          {isLoading && Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden rounded-xl shadow-md flex flex-col">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-6 flex flex-col flex-grow">
+                <Skeleton className="h-8 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3 mb-6" />
+                <Skeleton className="h-10 w-full mt-auto" />
+              </div>
+            </Card>
+          ))}
+          {!isLoading && services?.map((service) => (
+            <Card key={service.id} className="overflow-hidden rounded-xl shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col">
+              <div className="relative w-full h-48 bg-muted">
                 <Image
-                  src={service.imageUrl}
-                  alt={service.title}
+                  src={`https://picsum.photos/seed/${service.id}/600/400`}
+                  alt={service.name}
                   fill
                   className="object-cover"
-                  data-ai-hint={service.imageHint}
+                  data-ai-hint="mechanic working"
                 />
               </div>
               <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-xl font-bold" style={{ minHeight: '5.5rem'}}>{service.title}</h3>
-                <p className="text-muted-foreground text-sm mt-2 mb-6 flex-grow">
+                <h3 className="text-xl font-bold">{service.name}</h3>
+                <p className="text-muted-foreground text-sm mt-2 mb-6 flex-grow whitespace-pre-wrap">
                   {service.description}
                 </p>
                 <Button variant="outline" className="w-full mt-auto">View Details</Button>
               </div>
             </Card>
           ))}
+          {!isLoading && services?.length === 0 && (
+            <p className="col-span-full text-center text-muted-foreground">
+              No services have been added yet.
+            </p>
+          )}
         </div>
       </div>
     </div>

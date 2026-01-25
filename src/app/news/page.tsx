@@ -61,7 +61,7 @@ export default function NewsPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   {format(new Date(item.date), 'MMMM d, yyyy')}
                 </p>
-                <div className="text-sm text-muted-foreground mt-4 flex-grow" dangerouslySetInnerHTML={{ __html: item.content.replace(/\n/g, '<br />') }} />
+                <div className="text-sm text-muted-foreground mt-4 flex-grow whitespace-pre-wrap">{item.content}</div>
               </CardContent>
             </Card>
           ))}
