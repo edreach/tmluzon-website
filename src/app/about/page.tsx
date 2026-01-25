@@ -18,8 +18,14 @@ export default function AboutPage() {
   return (
     <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-16 sm:py-24 max-w-5xl">
-        <div className="max-w-4xl mx-auto">
-            <div className="space-y-6 text-muted-foreground text-lg text-left">
+        <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">
+                T.M. LUZON ENGINEERING SALES & SERVICES COMPANY
+            </h1>
+            <p className="mt-2 text-md text-muted-foreground">
+                (also Known as T.M. Luzon Airconditioning & Refrigeration Repair & Services)
+            </p>
+            <div className="mt-8 space-y-6 text-muted-foreground text-lg text-left">
                 <p>
                     We as a young and dynamic company established on January 2015. We as an Air-conditioning company, which
                     currently compose of Professional Mechanical Engineer; it has 20 employees, including office staff, service
@@ -49,12 +55,6 @@ export default function AboutPage() {
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">
                     Overview
                 </h1>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                    T.M. LUZON ENGINEERING SALES & SERVICES COMPANY
-                </h2>
-                <p className="mt-2 text-md text-muted-foreground">
-                    (also Known as T.M. Luzon Airconditioning & Refrigeration Repair & Services)
-                </p>
             </div>
              <p className="text-lg text-muted-foreground">
                 We specialize in the supply, installation, and maintenance of high-quality air-conditioning systems for residential, commercial, and industrial clients. Our goal is to provide energy-efficient, cost-effective cooling solutions tailored to meet the unique needs of every customer.
