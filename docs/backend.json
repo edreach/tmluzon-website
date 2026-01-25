@@ -19,13 +19,22 @@
           "description": "Detailed description of the product, potentially augmented by AI."
         },
         "specifications": {
-          "type": "string",
-          "description": "Technical specifications of the product (materials, dimensions, etc.)."
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "type": "string" }
+            }
+          }
         },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the high-resolution image showcasing the product.",
-          "format": "uri"
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the high-resolution images showcasing the product.",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
         },
         "price": {
           "type": "number",
@@ -34,16 +43,23 @@
         "type": {
           "type": "string",
           "description": "The type of the product (e.g., Wall Mounted, Floor Mounted)."
+        },
+        "brand": {
+          "type": "string",
+          "description": "The brand of the product."
+        },
+        "subType": {
+          "type": "string",
+          "description": "The sub-type of the product (e.g., Indoor, Outdoor)."
         }
       },
       "required": [
-        "id",
         "name",
         "description",
-        "specifications",
-        "imageUrl",
         "price",
-        "type"
+        "type",
+        "brand",
+        "subType"
       ]
     },
     "CustomerReview": {

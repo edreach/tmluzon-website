@@ -36,12 +36,16 @@ export default function CartSheetContent() {
           {cart.map((item) => (
             <div key={item.product.id} className="flex items-center gap-4">
               <div className="relative h-20 w-20 overflow-hidden rounded-md">
-                <Image
-                  src={item.product.images[0].imageUrl}
-                  alt={item.product.name}
-                  fill
-                  className="object-cover"
-                />
+                {item.product.imageUrls && item.product.imageUrls.length > 0 ? (
+                    <Image
+                    src={item.product.imageUrls[0]}
+                    alt={item.product.name}
+                    fill
+                    className="object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-muted-foreground">No Image</div>
+                )}
               </div>
               <div className="flex-1">
                 <p className="font-semibold">{item.product.name}</p>

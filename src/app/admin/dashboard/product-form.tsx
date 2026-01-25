@@ -5,17 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { saveProduct } from "./product-actions";
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
 import { Sparkles, Trash2, Upload } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
-import { useStorage } from "@/firebase";
+import { useFirestore, useStorage } from "@/firebase";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
+import { z } from "zod";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,23 +31,36 @@ interface ProductFormProps {
   product: Product;
 }
 
+const ProductFormSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters."),
+  price: z.coerce.number().positive("Price must be a positive number."),
+  description: z.string().min(10, "Description must be at least 10 characters."),
+  type: z.string().min(2, "Type must be at least 2 characters."),
+  brand: z.string().min(2, "Brand must be at least 2 characters."),
+  subType: z.string().min(2, "Sub-type must be at least 2 characters."),
+  imageUrls: z.array(z.string().url()).min(1, "At least one image is required."),
+  specifications: z.array(z.object({ name: z.string(), value: z.string()})).optional(),
+});
+
+
 export default function ProductForm({ product: initialProduct }: ProductFormProps) {
   const [product, setProduct] = useState(initialProduct);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  const [state, formAction] = useActionState(saveProduct, { message: "", success: false });
   const router = useRouter();
-
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialProduct.images.map(i => i.imageUrl));
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
-  const [isUploading, setIsUploading] = useState(false);
+  const firestore = useFirestore();
   const storage = useStorage();
 
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialProduct.imageUrls);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [isUploading, setIsUploading] = useState(false);
+ 
 
   useEffect(() => {
     setProduct(initialProduct);
-    setImageUrls(initialProduct.images.map(i => i.imageUrl));
+    setImageUrls(initialProduct.imageUrls);
   }, [initialProduct]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -135,39 +149,89 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
   const handleRemoveImage = (urlToRemove: string) => {
       setImageUrls(prev => prev.filter(url => url !== urlToRemove));
   };
-
-
-  useEffect(() => {
-    if (state.message) {
-      toast({
-        title: state.success ? "Success" : "Error",
-        description: state.message,
-        variant: state.success ? "default" : "destructive",
-      });
-       if (state.success) {
-        router.push('/admin/dashboard');
-      }
+  
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    if (!firestore) {
+        toast({ title: 'Error', description: 'Firestore is not available.', variant: 'destructive' });
+        setIsSaving(false);
+        return;
     }
-  }, [state, toast, router]);
+
+    const productToSave = {
+        ...product,
+        imageUrls: imageUrls,
+        price: Number(product.price) || 0,
+    };
+
+    const parsed = ProductFormSchema.safeParse(productToSave);
+
+    if (!parsed.success) {
+      toast({
+        title: "Validation Error",
+        description: parsed.error.errors.map((e) => e.message).join(", "),
+        variant: "destructive",
+      });
+      setIsSaving(false);
+      return;
+    }
+
+    try {
+      const isNew = product.id === 'new';
+      
+      if (isNew) {
+        const { id, ...dataToSave } = parsed.data;
+        await addDoc(collection(firestore, 'products'), dataToSave);
+      } else {
+        await setDoc(doc(firestore, 'products', product.id), parsed.data);
+      }
+      
+      toast({
+          title: 'Product Saved',
+          description: 'Your product has been saved successfully.',
+      });
+
+      router.push('/admin/dashboard');
+
+    } catch (error: any) {
+        console.error("Error saving product: ", error);
+        toast({
+            title: 'Save Error',
+            description: error.message || 'An unexpected error occurred.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
-      <input type="hidden" name="id" value={product.id} />
-      <input type="hidden" name="imageUrls" value={JSON.stringify(imageUrls)} />
-
-      <div className="space-y-2">
-        <Label htmlFor="name">Product Name</Label>
-        <Input id="name" name="name" value={product.name} onChange={handleInputChange} />
+    <form onSubmit={handleSave} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+            <Label htmlFor="name">Product Name</Label>
+            <Input id="name" name="name" value={product.name} onChange={handleInputChange} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="brand">Brand</Label>
+            <Input id="brand" name="brand" value={product.brand || ''} onChange={handleInputChange} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
+            <Input id="type" name="type" value={product.type || ''} onChange={handleInputChange} />
+        </div>
+         <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="subType">Sub-Type</Label>
+            <Input id="subType" name="subType" value={product.subType || ''} onChange={handleInputChange} />
+        </div>
       </div>
-       <div className="space-y-2">
-        <Label htmlFor="type">Product Type</Label>
-        <Input id="type" name="type" value={product.type || ''} onChange={handleInputChange} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="price">Price</Label>
-        <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} />
-      </div>
-
+      
        <div className="space-y-2">
         <Label htmlFor="images">Product Images</Label>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
@@ -224,7 +288,9 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
             {isAiLoading ? 'Enhancing...' : 'Enhance with AI'}
         </Button>
       </div>
-      <SubmitButton />
+      <Button type="submit" disabled={isSaving || isUploading}>
+        {isSaving ? "Saving..." : "Save Product"}
+      </Button>
     </form>
   );
 }

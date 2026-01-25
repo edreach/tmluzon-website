@@ -14,10 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LayoutGrid, List } from 'lucide-react';
 import { productListings as allProducts } from '@/lib/data';
-import type { ProductListingItem } from '@/lib/types';
+import type { Product } from '@/lib/types';
 
 export default function ProductsPage() {
-  const [products, setProducts] = React.useState<ProductListingItem[]>(allProducts);
+  const [products, setProducts] = React.useState<Product[]>(allProducts);
   const [view, setView] = React.useState('grid');
   
   const maxPrice = React.useMemo(() => Math.max(...allProducts.map(p => p.price), 100000), []);

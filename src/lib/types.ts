@@ -15,9 +15,11 @@ export type Product = {
   name: string;
   price: number;
   description: string;
-  images: ImagePlaceholder[];
+  imageUrls: string[];
   specifications: Specification[];
   type: string;
+  brand: string;
+  subType: string;
 };
 
 export type Review = {
@@ -33,16 +35,6 @@ export type Review = {
 export type CartItem = {
   product: Product;
   quantity: number;
-};
-
-export type ProductListingItem = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  brand: string;
-  type: string;
-  subType: string;
 };
 
 export type Service = {

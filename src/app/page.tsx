@@ -174,7 +174,7 @@ export default function Home() {
                       <Card className="overflow-hidden flex flex-col h-full">
                         <div className="relative w-full h-48 bg-muted">
                           <Image
-                            src={`https://picsum.photos/seed/${product.id}/400/400`}
+                            src={product.imageUrls[0] || `https://picsum.photos/seed/${product.id}/400/400`}
                             alt={product.name}
                             fill
                             className="object-cover"

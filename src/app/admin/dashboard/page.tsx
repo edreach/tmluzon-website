@@ -18,7 +18,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { productListings as allProducts } from "@/lib/data";
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import {
     DropdownMenu,
@@ -28,17 +27,35 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ProductListingItem } from '@/lib/types';
-
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, deleteDoc, doc } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
-    const [itemsPerPage, setItemsPerPage] = React.useState(10);
-    const [paginatedProducts, setPaginatedProducts] = React.useState<ProductListingItem[]>([]);
+    const firestore = useFirestore();
+    const { toast } = useToast();
 
-    React.useEffect(() => {
-        setPaginatedProducts(allProducts.slice(0, itemsPerPage));
-    }, [itemsPerPage]);
+    const productsQuery = useMemoFirebase(
+        () => (firestore ? collection(firestore, 'products') : null),
+        [firestore]
+    );
+    const { data: products, isLoading } = useCollection<Product>(productsQuery);
+
+    const handleDelete = (productId: string) => {
+        if (!firestore || !productId) return;
+        if (confirm('Are you sure you want to delete this product?')) {
+            deleteDoc(doc(firestore, 'products', productId))
+                .then(() => {
+                    toast({ title: 'Product Deleted', description: 'The product has been successfully removed.' });
+                })
+                .catch((error) => {
+                    console.error("Error deleting document: ", error);
+                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the product.' });
+                });
+        }
+    };
 
     return (
         <>
@@ -54,23 +71,10 @@ export default function Dashboard() {
                 </div>
             </div>
             <Card>
-                <CardHeader className="flex-row items-center justify-between">
+                <CardHeader>
                     <div>
                         <CardTitle>Product Catalog</CardTitle>
                         <CardDescription>Manage your products here.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-sm text-muted-foreground whitespace-nowrap">Show items:</label>
-                        <Select value={String(itemsPerPage)} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                            <SelectTrigger className="w-[80px]">
-                                <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="10">10</SelectItem>
-                                <SelectItem value="30">30</SelectItem>
-                                <SelectItem value="50">50</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -87,7 +91,18 @@ export default function Dashboard() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedProducts.map((product) => (
+                            {isLoading && (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                                        <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                            {!isLoading && products?.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">{product.name}</TableCell>
                                     <TableCell>
@@ -107,7 +122,7 @@ export default function Dashboard() {
                                                 <DropdownMenuItem asChild>
                                                    <Link href={`/admin/dashboard/products/${product.id}/edit`}>Edit</Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive">
+                                                <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(product.id)}>
                                                     Delete
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
@@ -115,6 +130,11 @@ export default function Dashboard() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                             {!isLoading && products?.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center h-24">No products found.</TableCell>
+                                </TableRow>
+                             )}
                         </TableBody>
                     </Table>
                 </CardContent>

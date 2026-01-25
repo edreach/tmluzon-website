@@ -9,7 +9,9 @@ export default function NewProductPage() {
       price: 0,
       description: '',
       type: '',
-      images: [],
+      brand: '',
+      subType: '',
+      imageUrls: [],
       specifications: [],
   }
 
