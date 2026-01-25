@@ -1,6 +1,20 @@
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 export default function AboutPage() {
+
+  const brandLogos = [
+    { src: "https://picsum.photos/seed/brand1/150/100", alt: "Brand 1", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand2/150/100", alt: "Brand 2", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand3/150/100", alt: "Brand 3", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand4/150/100", alt: "Brand 4", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand5/150/100", alt: "Brand 5", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand6/150/100", alt: "Brand 6", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand7/150/100", alt: "Brand 7", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand8/150/100", alt: "Brand 8", hint: "logo design"},
+    { src: "https://picsum.photos/seed/brand9/150/100", alt: "Brand 9", hint: "logo design"},
+  ];
+
   return (
     <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-16 sm:py-24 max-w-5xl">
@@ -83,6 +97,39 @@ export default function AboutPage() {
                     <p className="mt-2 text-muted-foreground">
                         We offer ongoing maintenance contracts to ensure your system runs efficiently all year round. We also provide fast and reliable repair services for all major AC brands.
                     </p>
+                </div>
+            </div>
+        </div>
+
+        <Separator className="my-16" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+            <div>
+                <h2 className="text-3xl font-bold tracking-tight mb-8">Our Company Statement</h2>
+                <div className="space-y-6 text-muted-foreground text-lg">
+                    <div>
+                        <h4 className="text-xl font-bold text-foreground">Purpose:</h4>
+                        <p>To be one of the best in the Mechanical Industry that provides Installation, Repair & Services, relationship and profitability for our clients and the company itself.</p>
+                    </div>
+                    <div>
+                        <h4 className="text-xl font-bold text-foreground">Vision:</h4>
+                        <p>To provide Excellent Services through our experience and capabilities and maintains an excellent level of Customer Service Satisfactory, where our clients personalized requirements are met.</p>
+                    </div>
+                    <div>
+                        <h4 className="text-xl font-bold text-foreground">Mission Statement:</h4>
+                        <p>To build long term relationships with our customers and clients and provide exceptional customer services by pursuing business through innovative services with advanced technology for the industry.</p>
+                    </div>
+                </div>
+            </div>
+            <div className="bg-muted/30 p-8 rounded-lg">
+                <h2 className="text-3xl font-bold tracking-tight mb-4">Our Brands</h2>
+                <p className="text-muted-foreground text-lg mb-8">We work with the best brands.</p>
+                <div className="grid grid-cols-3 gap-4">
+                    {brandLogos.map((logo, index) => (
+                        <div key={index} className="relative aspect-[3/2] bg-background rounded-lg flex items-center justify-center p-2 shadow-sm">
+                            <Image src={logo.src} alt={logo.alt} fill className="object-contain p-2" data-ai-hint={logo.hint} />
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
