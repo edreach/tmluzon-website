@@ -7,6 +7,7 @@ export default function NewServicePage() {
       id: 'new',
       name: '',
       description: '',
+      imageUrls: [],
   }
 
   return (
@@ -26,3 +27,5 @@ export default function NewServicePage() {
     </>
   );
 }
+
+    

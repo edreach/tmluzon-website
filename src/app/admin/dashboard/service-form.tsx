@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Service } from "@/lib/types";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Trash2, Upload, Star } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
-import { useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
+import { useFirestore, useStorage, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
+import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import { collection, doc } from "firebase/firestore";
 import { z } from "zod";
+import Image from "next/image";
+import { Progress } from "@/components/ui/progress";
 
 interface ServiceFormProps {
   service: Service;
@@ -22,6 +25,7 @@ interface ServiceFormProps {
 const ServiceFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
+  imageUrls: z.array(z.string().url()).optional(),
 });
 
 export default function ServiceForm({ service: initialService }: ServiceFormProps) {
@@ -31,9 +35,16 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
   const { toast } = useToast();
   const router = useRouter();
   const firestore = useFirestore();
+  const storage = useStorage();
+
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialService.imageUrls || []);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setService(initialService);
+    setImageUrls(initialService.imageUrls || []);
   }, [initialService]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -64,6 +75,72 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImageFiles(prev => [...prev, ...files]);
+    }
+  };
+
+  const handleUploadImages = async () => {
+    if (imageFiles.length === 0 || !storage) return;
+    setIsUploading(true);
+    setUploadProgress({});
+
+    const uploadPromises = imageFiles.map(file => {
+      return new Promise<string>((resolve, reject) => {
+        const sRef = storageRef(storage, `services/${Date.now()}-${file.name}`);
+        const uploadTask = uploadBytesResumable(sRef, file);
+
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(prev => ({ ...prev, [file.name]: progress }));
+          },
+          (error) => {
+            console.error(`Upload failed for ${file.name}:`, error);
+            reject(error);
+          },
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              resolve(downloadURL);
+            });
+          }
+        );
+      });
+    });
+
+    try {
+      const urls = await Promise.all(uploadPromises);
+      setImageUrls(prev => [...prev, ...urls]);
+      setImageFiles([]);
+      toast({
+        title: 'Upload complete',
+        description: `${urls.length} image(s) have been uploaded.`,
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload Failed',
+        description: 'Some images failed to upload. Please check the console and storage rules.',
+      });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress({});
+    }
+  };
+
+  const handleRemoveImage = (urlToRemove: string) => {
+      setImageUrls(prev => prev.filter(url => url !== urlToRemove));
+  };
+
+  const handleSetPrimaryImage = (urlToMakePrimary: string) => {
+    setImageUrls(prev => [
+        urlToMakePrimary,
+        ...prev.filter(url => url !== urlToMakePrimary)
+    ]);
+  };
+
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
@@ -74,9 +151,14 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
         return;
     }
 
-    const serviceToValidate = { ...service };
+    const serviceToSave = {
+      ...service,
+      imageUrls,
+    };
 
-    const parsed = ServiceFormSchema.safeParse(serviceToValidate);
+    const { id, ...serviceDataToValidate } = serviceToSave;
+
+    const parsed = ServiceFormSchema.safeParse(serviceDataToValidate);
 
     if (!parsed.success) {
       toast({
@@ -88,13 +170,12 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
       return;
     }
 
-    const { id, ...serviceData } = service;
-    const isNew = id === 'new';
+    const isNew = service.id === 'new';
     
     if (isNew) {
-      addDocumentNonBlocking(collection(firestore, 'services'), serviceData);
+      addDocumentNonBlocking(collection(firestore, 'services'), parsed.data);
     } else {
-      setDocumentNonBlocking(doc(firestore, 'services', id), serviceData, { merge: true });
+      setDocumentNonBlocking(doc(firestore, 'services', service.id), parsed.data, { merge: true });
     }
     
     toast({
@@ -112,6 +193,66 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
         <Label htmlFor="name">Service Name</Label>
         <Input id="name" name="name" value={service.name} onChange={handleInputChange} />
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="images">Service Images</Label>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+            {imageUrls.map((url, index) => (
+                <div key={index} className="relative aspect-square group/image">
+                    <Image src={url} alt={`Service image ${index + 1}`} fill className="object-cover rounded-md border" />
+                    <div className="absolute top-1 right-1 flex flex-col gap-1 z-10">
+                        <Button type="button" variant="destructive" size="icon" className="h-6 w-6" onClick={() => handleRemoveImage(url)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant={index === 0 ? "secondary" : "ghost"} 
+                            size="icon" 
+                            className="h-6 w-6 bg-background/70 hover:bg-background"
+                            onClick={() => handleSetPrimaryImage(url)}
+                            title="Mark as primary image"
+                        >
+                            <Star className={`h-4 w-4 ${index === 0 ? 'text-yellow-400 fill-yellow-400' : 'text-foreground/50'}`} />
+                        </Button>
+                    </div>
+                    {index === 0 && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5 rounded-b-md">
+                            Primary
+                        </div>
+                    )}
+                </div>
+            ))}
+            <div className="relative aspect-square flex items-center justify-center border-2 border-dashed rounded-md">
+                <Label htmlFor="image-upload" className="cursor-pointer p-4 flex flex-col items-center justify-center text-center">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground mt-2">Add images</span>
+                </Label>
+                <Input id="image-upload" type="file" multiple className="sr-only" onChange={handleFileChange} disabled={isUploading} accept="image/*"/>
+            </div>
+        </div>
+
+        {imageFiles.length > 0 && (
+            <div className="space-y-2">
+                <Button type="button" onClick={handleUploadImages} disabled={isUploading}>
+                    {isUploading ? `Uploading...` : `Upload ${imageFiles.length} image(s)`}
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                    {imageFiles.map(f => f.name).join(', ')}
+                </div>
+            </div>
+        )}
+        {isUploading && (
+            <div className="space-y-2 mt-2">
+                {Object.entries(uploadProgress).map(([name, progress]) => (
+                    <div key={name}>
+                        <p className="text-sm text-muted-foreground">{name}</p>
+                        <Progress value={progress} className="w-full h-2" />
+                    </div>
+                ))}
+            </div>
+        )}
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea
@@ -126,9 +267,11 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
             {isAiLoading ? 'Enhancing...' : 'Enhance with AI'}
         </Button>
       </div>
-      <Button type="submit" disabled={isSaving}>
+      <Button type="submit" disabled={isSaving || isUploading}>
         {isSaving ? "Saving..." : "Save Service"}
       </Button>
     </form>
   );
 }
+
+    

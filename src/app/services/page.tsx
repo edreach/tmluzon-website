@@ -46,7 +46,7 @@ export default function ServicesPage() {
             <Card key={service.id} className="overflow-hidden rounded-xl shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col">
               <div className="relative w-full h-48 bg-muted">
                 <Image
-                  src={`https://picsum.photos/seed/${service.id}/600/400`}
+                  src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/600/400`}
                   alt={service.name}
                   fill
                   className="object-cover"
@@ -74,3 +74,5 @@ export default function ServicesPage() {
     </div>
   );
 }
+
+    

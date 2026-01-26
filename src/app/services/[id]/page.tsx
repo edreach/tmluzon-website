@@ -59,7 +59,7 @@ export default function ServiceDetailPage() {
         <div className="grid md:grid-cols-2 gap-12">
           <div className="relative aspect-square w-full bg-muted rounded-xl overflow-hidden">
               <Image
-                  src={`https://picsum.photos/seed/${service.id}/800/800`}
+                  src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/800/800`}
                   alt={service.name}
                   fill
                   className="object-cover"
@@ -80,3 +80,5 @@ export default function ServiceDetailPage() {
     </div>
   );
 }
+
+    

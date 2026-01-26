@@ -41,6 +41,7 @@ export type CartItem = {
 export type ServiceData = {
   name: string;
   description: string;
+  imageUrls: string[];
 };
 export type Service = ServiceData & { id: string };
 
@@ -51,7 +52,6 @@ export type UserProfile = {
 }
 
 export type AdminRole = {
-    id: string;
     uid: string;
 }
 
@@ -81,7 +81,13 @@ export type PricelistData = {
   fileName: string;
   fileUrl: string;
 };
-export type PricelistFile = PricelistData & { id: string };
+export type PricelistFile = {
+  id: string;
+  brand: string;
+  title: string;
+  fileName: string;
+  fileUrl: string;
+};
 
 export type NewsArticleData = {
   title: string;
@@ -99,3 +105,5 @@ export type BrandData = {
   imageHint?: string;
 };
 export type Brand = BrandData & { id: string };
+
+    
