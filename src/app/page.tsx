@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Award, ShieldCheck, Truck } from "lucide-react";
+import { Award, ShieldCheck, Wrench } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -38,9 +38,9 @@ export default function Home() {
       description: "We are committed to providing the highest quality products and services to our customers.",
     },
     {
-      icon: <Truck className="h-6 w-6" />,
-      title: "Free shipping",
-      description: "Enjoy free shipping on all orders, with no minimum purchase required.",
+      icon: <Wrench className="h-6 w-6" />,
+      title: "Professional Installation",
+      description: "Our team of certified technicians ensures your equipment is installed for peak performance and longevity.",
     },
     {
       icon: <Award className="h-6 w-6" />,
