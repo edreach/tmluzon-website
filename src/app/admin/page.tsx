@@ -1,7 +1,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { doc } from 'firebase/firestore';
+import type { SiteSettings } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -20,6 +24,15 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Fetch site settings for logo
+  const firestore = useFirestore();
+  const settingsRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null),
+    [firestore]
+  );
+  const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
+
 
   useEffect(() => {
     // If user is already logged in, redirect them to the dashboard.
@@ -82,6 +95,22 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
+            <div className="mx-auto mb-4 h-20 w-48 relative">
+              {isLoadingSettings ? (
+                <Skeleton className="h-full w-full" />
+              ) : siteSettings?.logoUrl ? (
+                <Image
+                  src={siteSettings.logoUrl}
+                  alt="Company Logo"
+                  fill
+                  className="object-contain"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+                  Company Logo
+                </div>
+              )}
+            </div>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
         </CardHeader>
