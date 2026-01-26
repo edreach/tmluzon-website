@@ -45,13 +45,23 @@ export default function ServicesPage() {
           {!isLoading && services?.map((service) => (
             <Card key={service.id} className="overflow-hidden rounded-xl shadow-md transition-shadow duration-300 hover:shadow-xl flex flex-col">
               <div className="relative w-full h-48 bg-muted">
-                <Image
-                  src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/600/400`}
-                  alt={service.name}
-                  fill
-                  className="object-cover"
-                  data-ai-hint="mechanic working"
-                />
+                {service.imageUrls && service.imageUrls.length > 0 ? (
+                    <Image
+                      src={service.imageUrls[0]}
+                      alt={service.name}
+                      fill
+                      className="object-cover"
+                      data-ai-hint="mechanic working"
+                    />
+                ) : (
+                    <Image
+                      src={`https://picsum.photos/seed/${service.id}/600/400`}
+                      alt={service.name}
+                      fill
+                      className="object-cover"
+                      data-ai-hint="placeholder image"
+                    />
+                )}
               </div>
               <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-xl font-bold">{service.name}</h3>
@@ -74,5 +84,3 @@ export default function ServicesPage() {
     </div>
   );
 }
-
-    
