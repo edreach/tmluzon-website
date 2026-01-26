@@ -218,7 +218,7 @@ export default function Home() {
                             <h3 className="font-semibold text-sm h-10 truncate flex-grow" title={product.name}>{product.name}</h3>
                             <p className="text-xs text-muted-foreground uppercase">{product.subType}</p>
                             <Button asChild size="sm" className="mt-4">
-                              <Link href="/products">View Details</Link>
+                              <Link href={`/products/${product.id}`}>View Details</Link>
                             </Button>
                           </CardContent>
                         </Card>

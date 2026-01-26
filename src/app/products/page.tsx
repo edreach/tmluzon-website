@@ -209,19 +209,21 @@ export default function ProductsPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.slice(0, itemsPerPage).map((product) => (
-                  <Card key={product.id} className="overflow-hidden group">
-                    <div className="bg-muted h-48 flex items-center justify-center text-muted-foreground relative">
-                       {product.imageUrls && product.imageUrls.length > 0 ? (
-                        <Image src={product.imageUrls[0]} alt={product.name} fill className="object-cover" />
-                      ) : (
-                        <span>No Image</span>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold text-sm truncate">{product.name}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground truncate">{product.description}</p>
-                    </CardContent>
-                  </Card>
+                  <Link key={product.id} href={`/products/${product.id}`} className="block">
+                    <Card className="overflow-hidden group h-full transition-shadow duration-300 hover:shadow-lg">
+                      <div className="bg-muted h-48 flex items-center justify-center text-muted-foreground relative">
+                         {product.imageUrls && product.imageUrls.length > 0 ? (
+                          <Image src={product.imageUrls[0]} alt={product.name} fill className="object-cover" />
+                        ) : (
+                          <span>No Image</span>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-sm truncate">{product.name}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground truncate">{product.description}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             )}
