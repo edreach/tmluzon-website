@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -7,11 +8,11 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { PricelistFile } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { useFirestore, useStorage } from "@/firebase";
+import { useFirestore, useStorage, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import { Progress } from "@/components/ui/progress";
 import { z } from "zod";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
 import { FileText, Upload } from "lucide-react";
 
 const PricelistFormSchema = z.object({
@@ -119,10 +120,9 @@ export default function PricelistForm({ pricelist: initialPricelist }: { priceli
       const isNew = pricelist.id === 'new';
       
       if (isNew) {
-        const { id, ...dataToSave } = parsed.data;
-        await addDoc(collection(firestore, 'pricelists'), dataToSave);
+        addDocumentNonBlocking(collection(firestore, 'pricelists'), parsed.data);
       } else {
-        await setDoc(doc(firestore, 'pricelists', pricelist.id), parsed.data);
+        setDocumentNonBlocking(doc(firestore, 'pricelists', pricelist.id), parsed.data, { merge: true });
       }
       
       toast({
@@ -190,5 +190,4 @@ export default function PricelistForm({ pricelist: initialPricelist }: { priceli
     </form>
   );
 }
-
     

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Input } from '@/components/ui/input';
@@ -7,11 +8,11 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { Brand } from '@/lib/types';
 import { useRouter } from 'next/navigation';
-import { useFirestore, useStorage } from '@/firebase';
+import { useFirestore, useStorage, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import { z } from 'zod';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 import Image from 'next/image';
 import { Trash2, Upload } from 'lucide-react';
 
@@ -114,12 +115,11 @@ export default function BrandForm({ brand: initialBrand }: { brand: Brand }) {
 
     try {
       const isNew = brand.id === 'new';
-      const { id, ...dataToSave } = parsed.data;
 
       if (isNew) {
-        await addDoc(collection(firestore, 'brands'), dataToSave);
+        addDocumentNonBlocking(collection(firestore, 'brands'), parsed.data);
       } else {
-        await setDoc(doc(firestore, 'brands', brand.id), dataToSave);
+        setDocumentNonBlocking(doc(firestore, 'brands', brand.id), parsed.data, { merge: true });
       }
 
       toast({
@@ -128,7 +128,7 @@ export default function BrandForm({ brand: initialBrand }: { brand: Brand }) {
       });
 
       router.push('/admin/dashboard/brands');
-      router.refresh(); // To ensure the layout re-fetches any data if needed
+      router.refresh();
     } catch (error: any) {
       console.error('Error saving brand: ', error);
       toast({

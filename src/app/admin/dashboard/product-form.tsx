@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useFormStatus } from "react-dom";
@@ -11,12 +12,12 @@ import type { Product } from "@/lib/types";
 import { Sparkles, Trash2, Upload } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
-import { useFirestore, useStorage } from "@/firebase";
+import { useFirestore, useStorage, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { z } from "zod";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
 
 function SubmitButton() {
@@ -184,10 +185,9 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
       const isNew = product.id === 'new';
       
       if (isNew) {
-        const { id, ...dataToSave } = parsed.data;
-        await addDoc(collection(firestore, 'products'), dataToSave);
+        addDocumentNonBlocking(collection(firestore, 'products'), parsed.data);
       } else {
-        await setDoc(doc(firestore, 'products', product.id), parsed.data);
+        setDocumentNonBlocking(doc(firestore, 'products', product.id), parsed.data, { merge: true });
       }
       
       toast({

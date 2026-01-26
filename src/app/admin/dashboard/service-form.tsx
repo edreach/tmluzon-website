@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,8 @@ import type { Service } from "@/lib/types";
 import { Sparkles } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
-import { useFirestore } from "@/firebase";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import { z } from "zod";
 
 interface ServiceFormProps {
@@ -95,9 +96,9 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
       const isNew = service.id === 'new';
       
       if (isNew) {
-        await addDoc(collection(firestore, 'services'), parsed.data);
+        addDocumentNonBlocking(collection(firestore, 'services'), parsed.data);
       } else {
-        await setDoc(doc(firestore, 'services', service.id), parsed.data);
+        setDocumentNonBlocking(doc(firestore, 'services', service.id), parsed.data, { merge: true });
       }
       
       toast({
