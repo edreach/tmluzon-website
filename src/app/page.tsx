@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/carousel"
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
-import type { Product, ProductData, ServiceData } from '@/lib/types';
+import type { Product, ProductData, Service, ServiceData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -114,7 +114,7 @@ export default function Home() {
               </Card>
             ))
           ) : (
-            services?.map((service) => (
+            services?.map((service: Service) => (
               <Card key={service.id} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl flex flex-col">
                 <div className="relative w-full h-48 bg-muted">
                   <Image
@@ -127,8 +127,8 @@ export default function Home() {
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                   <h3 className="text-lg font-bold h-14">{service.name}</h3>
-                  <p className="text-muted-foreground text-sm h-24 overflow-hidden text-ellipsis">
-                    {service.description}
+                  <p className="text-muted-foreground text-sm h-24 overflow-hidden">
+                    {service.description.split('.')[0]}. ...
                   </p>
                   <Button asChild className="w-full mt-auto">
                     <Link href={`/services/${service.id}`}>View Details</Link>
@@ -201,7 +201,7 @@ export default function Home() {
                     </CarouselItem>
                   ))
                 ) : (
-                  (productListings || []).slice(0, 8).map((product) => (
+                  (productListings as Product[] || []).slice(0, 8).map((product) => (
                     <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                       <div className="p-1 h-full">
                         <Card className="overflow-hidden flex flex-col h-full">
