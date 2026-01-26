@@ -17,6 +17,7 @@ function EditServicePage() {
       () => (firestore && id) ? doc(firestore, 'services', id) : null,
       [firestore, id]
   );
+  
   const { data: service, isLoading } = useDoc<ServiceData>(serviceRef);
   
   if (isLoading) {
@@ -43,7 +44,7 @@ function EditServicePage() {
     );
   }
 
-  if (!service && !isLoading) {
+  if (!service) {
     notFound();
   }
 
@@ -54,11 +55,11 @@ function EditServicePage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {service?.name}</CardTitle>
+            <CardTitle>Edit: {service.name}</CardTitle>
             <CardDescription>Update your service details and use AI to enhance descriptions.</CardDescription>
         </CardHeader>
         <CardContent>
-            {service && <ServiceForm service={service as Service} />}
+            <ServiceForm service={service as Service} />
         </CardContent>
       </Card>
     </>

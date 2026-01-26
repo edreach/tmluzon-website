@@ -43,7 +43,7 @@ function EditBrandPage() {
     );
   }
 
-  if (!brand && !isLoading) {
+  if (!brand) {
     notFound();
   }
 
@@ -54,11 +54,11 @@ function EditBrandPage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {brand?.name}</CardTitle>
+            <CardTitle>Edit: {brand.name}</CardTitle>
             <CardDescription>Update this brand's details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {brand && <BrandForm brand={brand as Brand} />}
+            <BrandForm brand={brand as Brand} />
         </CardContent>
       </Card>
     </>

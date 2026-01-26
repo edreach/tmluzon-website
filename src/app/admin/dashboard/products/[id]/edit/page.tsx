@@ -47,7 +47,7 @@ function EditProductPage() {
     );
   }
 
-  if (!product && !isLoading) {
+  if (!product) {
     notFound();
   }
 
@@ -58,11 +58,11 @@ function EditProductPage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {product?.name}</CardTitle>
+            <CardTitle>Edit: {product.name}</CardTitle>
             <CardDescription>Update your product details and use AI to enhance descriptions.</CardDescription>
         </CardHeader>
         <CardContent>
-            {product && <ProductForm product={product as Product} />}
+            <ProductForm product={product as Product} />
         </CardContent>
       </Card>
     </>

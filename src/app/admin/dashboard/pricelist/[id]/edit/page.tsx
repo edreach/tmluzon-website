@@ -43,7 +43,7 @@ function EditPricelistPage() {
     );
   }
 
-  if (!pricelist && !isLoading) {
+  if (!pricelist) {
     notFound();
   }
 
@@ -54,11 +54,11 @@ function EditPricelistPage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {pricelist?.title}</CardTitle>
+            <CardTitle>Edit: {pricelist.title}</CardTitle>
             <CardDescription>Update your pricelist details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {pricelist && <PricelistForm pricelist={pricelist as PricelistFile} />}
+            <PricelistForm pricelist={pricelist as PricelistFile} />
         </CardContent>
       </Card>
     </>

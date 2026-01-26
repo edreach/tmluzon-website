@@ -1,7 +1,7 @@
 'use client';
 
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import type { Service, ServiceData } from '@/lib/types';
+import type { ServiceData } from '@/lib/types';
 import { doc } from 'firebase/firestore';
 import { notFound, useParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!isLoading && !service) {
+  if (!service) {
     notFound();
   }
 
@@ -56,7 +56,7 @@ export default function ServiceDetailPage() {
                 Back to Services
             </Link>
         </Button>
-      {service && (
+      
         <div className="grid md:grid-cols-2 gap-12">
           <div className="relative aspect-square w-full bg-muted rounded-xl overflow-hidden">
               <Image
@@ -80,7 +80,7 @@ export default function ServiceDetailPage() {
             </Button>
           </div>
         </div>
-      )}
+      
     </div>
   );
 }

@@ -56,7 +56,7 @@ function EditNewsArticlePage() {
     );
   }
 
-  if (!article && !isLoading) {
+  if (!article) {
     notFound();
   }
 
@@ -67,10 +67,10 @@ function EditNewsArticlePage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Edit: {article?.title}</CardTitle>
+          <CardTitle>Edit: {article.title}</CardTitle>
           <CardDescription>Update your news article details.</CardDescription>
         </CardHeader>
-        <CardContent>{article && <NewsForm article={article as NewsArticle} />}</CardContent>
+        <CardContent><NewsForm article={article as NewsArticle} /></CardContent>
       </Card>
     </>
   );
