@@ -4,8 +4,20 @@
         "https://6000-firebase-studio-1769239600045.cluster-zkm2jrwbnbd4awuedc2alqxrpk.cloudworkstations.dev",
         "https://9000-firebase-studio-1769239600045.cluster-zkm2jrwbnbd4awuedc2alqxrpk.cloudworkstations.dev"
       ],
-      "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+      "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
       "maxAgeSeconds": 3600,
-      "responseHeader": ["Content-Type", "Authorization", "x-goog-resumable"]
+      "responseHeader": [
+        "Content-Type",
+        "Authorization",
+        "x-goog-resumable",
+        "Content-Length",
+        "X-Goog-Content-Length-Range",
+        "X-Goog-Upload-Command",
+        "X-Goog-Upload-Header-Content-Length",
+        "X-Goog-Upload-Header-Content-Type",
+        "X-Goog-Upload-Offset",
+        "X-Goog-Upload-Protocol",
+        "X-Goog-Upload-Status"
+      ]
     }
 ]
