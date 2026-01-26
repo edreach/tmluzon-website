@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
@@ -57,7 +58,9 @@ export default function ServicesPage() {
                 <p className="text-muted-foreground text-sm mt-2 mb-6 flex-grow whitespace-pre-wrap">
                   {service.description}
                 </p>
-                <Button variant="outline" className="w-full mt-auto">View Details</Button>
+                <Button asChild variant="outline" className="w-full mt-auto">
+                  <Link href={`/services/${service.id}`}>View Details</Link>
+                </Button>
               </div>
             </Card>
           ))}
