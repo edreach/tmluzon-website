@@ -17,7 +17,7 @@ function EditServicePage() {
       () => (firestore && id) ? doc(firestore, 'services', id) : null,
       [firestore, id]
   );
-  const { data: service, isLoading } = useDoc<Omit<Service, 'id'>>(serviceRef);
+  const { data: service, isLoading } = useDoc<Service>(serviceRef);
   
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function EditServicePage() {
     );
   }
 
-  if (!service && !isLoading) {
+  if (!service && !isLoading && serviceRef) {
     notFound();
   }
 

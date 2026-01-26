@@ -17,7 +17,7 @@ function EditProductPage() {
       () => (firestore && id) ? doc(firestore, 'products', id) : null,
       [firestore, id]
   );
-  const { data: product, isLoading } = useDoc<Omit<Product, 'id'>>(productRef);
+  const { data: product, isLoading } = useDoc<Product>(productRef);
   
   if (isLoading) {
     return (
@@ -47,7 +47,7 @@ function EditProductPage() {
     );
   }
 
-  if (!product && !isLoading) {
+  if (!product && !isLoading && productRef) {
     notFound();
   }
 

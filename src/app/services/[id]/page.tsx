@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!isLoading && !service) {
+  if (!isLoading && !service && serviceRef) {
     notFound();
   }
 
