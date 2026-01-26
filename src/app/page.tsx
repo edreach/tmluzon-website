@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/carousel"
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
-import type { Product } from '@/lib/types';
+import type { Product, ProductData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -23,7 +23,7 @@ export default function Home() {
     () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
     [firestore]
   );
-  const { data: productListings, isLoading } = useCollection<Product>(productsQuery);
+  const { data: productListings, isLoading } = useCollection<ProductData>(productsQuery);
 
   const services = [
     {

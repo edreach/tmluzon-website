@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import NewsForm from '../../../news-form';
 import { notFound, useParams } from 'next/navigation';
-import type { NewsArticle } from '@/lib/types';
+import type { NewsArticle, NewsArticleData } from '@/lib/types';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,7 +17,7 @@ function EditNewsArticlePage() {
     () => (firestore && id ? doc(firestore, 'news', id) : null),
     [firestore, id]
   );
-  const { data: article, isLoading } = useDoc<NewsArticle>(articleRef);
+  const { data: article, isLoading } = useDoc<NewsArticleData>(articleRef);
 
   if (isLoading) {
     return (
@@ -56,7 +56,7 @@ function EditNewsArticlePage() {
     );
   }
 
-  if (!article && !isLoading && articleRef) {
+  if (!article && !isLoading) {
     notFound();
   }
 
@@ -70,7 +70,7 @@ function EditNewsArticlePage() {
           <CardTitle>Edit: {article?.title}</CardTitle>
           <CardDescription>Update your news article details.</CardDescription>
         </CardHeader>
-        <CardContent>{article && <NewsForm article={article} />}</CardContent>
+        <CardContent>{article && <NewsForm article={article as NewsArticle} />}</CardContent>
       </Card>
     </>
   );

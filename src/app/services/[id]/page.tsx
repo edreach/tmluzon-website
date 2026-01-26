@@ -1,7 +1,7 @@
 'use client';
 
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import type { Service } from '@/lib/types';
+import type { Service, ServiceData } from '@/lib/types';
 import { doc } from 'firebase/firestore';
 import { notFound, useParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +19,7 @@ export default function ServiceDetailPage() {
     () => (firestore && id ? doc(firestore, 'services', id) : null),
     [firestore, id]
   );
-  const { data: service, isLoading } = useDoc<Service>(serviceRef);
+  const { data: service, isLoading } = useDoc<ServiceData>(serviceRef);
 
   if (isLoading) {
     return (
@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!isLoading && !service && serviceRef) {
+  if (!isLoading && !service) {
     notFound();
   }
 

@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
-import type { Product } from '@/lib/types';
+import type { Product, ProductData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -41,7 +41,7 @@ export default function Dashboard() {
         () => (firestore ? collection(firestore, 'products') : null),
         [firestore]
     );
-    const { data: products, isLoading } = useCollection<Product>(productsQuery);
+    const { data: products, isLoading } = useCollection<ProductData>(productsQuery);
 
     const handleDelete = (productId: string) => {
         if (!firestore || !productId) return;

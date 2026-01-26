@@ -14,7 +14,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LayoutGrid, List } from 'lucide-react';
-import type { Product } from '@/lib/types';
+import type { Product, ProductData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,7 +27,7 @@ export default function ProductsPage() {
     () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
     [firestore]
   );
-  const { data: allProducts, isLoading } = useCollection<Product>(productsQuery);
+  const { data: allProducts, isLoading } = useCollection<ProductData>(productsQuery);
   
   const [products, setProducts] = React.useState<Product[]>([]);
   const [view, setView] = React.useState('grid');
@@ -54,7 +54,7 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = React.useState('popularity');
 
   React.useEffect(() => {
-    let filtered = allProducts || [];
+    let filtered = (allProducts as Product[]) || [];
 
     if (brand !== 'All Brands') {
       filtered = filtered.filter((p) => p.brand === brand);

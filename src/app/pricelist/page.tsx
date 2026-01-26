@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Download } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
-import type { PricelistFile } from "@/lib/types";
+import type { PricelistFile, PricelistData } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PricelistPage() {
@@ -15,7 +15,7 @@ export default function PricelistPage() {
     () => (firestore ? collection(firestore, "pricelists") : null),
     [firestore]
   );
-  const { data: pricelists, isLoading } = useCollection<PricelistFile>(pricelistsQuery);
+  const { data: pricelists, isLoading } = useCollection<PricelistData>(pricelistsQuery);
 
   const pricelistGroups = React.useMemo(() => {
     if (!pricelists) return [];
@@ -26,7 +26,7 @@ export default function PricelistPage() {
         group = { brand: file.brand, files: [] };
         groups.push(group);
       }
-      group.files.push(file);
+      group.files.push(file as PricelistFile);
     });
     return groups.sort((a,b) => a.brand.localeCompare(b.brand));
   }, [pricelists]);
@@ -119,5 +119,3 @@ export default function PricelistPage() {
     </div>
   );
 }
-
-    

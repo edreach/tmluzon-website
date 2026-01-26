@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Service } from '@/lib/types';
+import type { Service, ServiceData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -41,7 +41,7 @@ export default function ServicesPage() {
         () => (firestore ? collection(firestore, 'services') : null),
         [firestore]
     );
-    const { data: services, isLoading } = useCollection<Service>(servicesQuery);
+    const { data: services, isLoading } = useCollection<ServiceData>(servicesQuery);
 
     const handleDelete = (serviceId: string) => {
         if (!firestore || !serviceId) return;

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PricelistForm from "../../../pricelist-form";
 import { notFound, useParams } from "next/navigation";
-import type { PricelistFile } from "@/lib/types";
+import type { PricelistFile, PricelistData } from "@/lib/types";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,7 @@ function EditPricelistPage() {
       () => (firestore && id) ? doc(firestore, 'pricelists', id) : null,
       [firestore, id]
   );
-  const { data: pricelist, isLoading } = useDoc<PricelistFile>(pricelistRef);
+  const { data: pricelist, isLoading } = useDoc<PricelistData>(pricelistRef);
   
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function EditPricelistPage() {
     );
   }
 
-  if (!pricelist && !isLoading && pricelistRef) {
+  if (!pricelist && !isLoading) {
     notFound();
   }
 
@@ -58,7 +58,7 @@ function EditPricelistPage() {
             <CardDescription>Update your pricelist details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {pricelist && <PricelistForm pricelist={pricelist} />}
+            {pricelist && <PricelistForm pricelist={pricelist as PricelistFile} />}
         </CardContent>
       </Card>
     </>

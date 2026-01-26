@@ -10,8 +10,7 @@ export type Specification = {
   value: string;
 };
 
-export type Product = {
-  id: string;
+export type ProductData = {
   name: string;
   price: number;
   description: string;
@@ -22,6 +21,7 @@ export type Product = {
   subType: string;
   discontinued?: boolean;
 };
+export type Product = ProductData & { id: string };
 
 export type Review = {
   id: string;
@@ -38,12 +38,12 @@ export type CartItem = {
   quantity: number;
 };
 
-export type Service = {
-  id: string;
+export type ServiceData = {
   name: string;
   price: number;
   description: string;
 };
+export type Service = ServiceData & { id: string };
 
 export type UserProfile = {
     uid: string;
@@ -82,22 +82,21 @@ export type PricelistData = {
   fileName: string;
   fileUrl: string;
 };
-
 export type PricelistFile = PricelistData & { id: string };
 
-export type NewsArticle = {
-  id: string;
+export type NewsArticleData = {
   title: string;
   date: string;
   content: string;
   imageUrl?: string;
   imageHint?: string;
 };
+export type NewsArticle = NewsArticleData & { id: string };
 
-export type Brand = {
-  id: string;
+export type BrandData = {
   name: string;
   logoUrl: string;
   websiteUrl?: string;
   imageHint?: string;
 };
+export type Brand = BrandData & { id: string };

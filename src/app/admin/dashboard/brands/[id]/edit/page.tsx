@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import BrandForm from "../../../brand-form";
 import { notFound, useParams } from "next/navigation";
-import type { Brand } from "@/lib/types";
+import type { Brand, BrandData } from "@/lib/types";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,7 @@ function EditBrandPage() {
       () => (firestore && id) ? doc(firestore, 'brands', id) : null,
       [firestore, id]
   );
-  const { data: brand, isLoading } = useDoc<Brand>(brandRef);
+  const { data: brand, isLoading } = useDoc<BrandData>(brandRef);
   
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function EditBrandPage() {
     );
   }
 
-  if (!brand && !isLoading && brandRef) {
+  if (!brand && !isLoading) {
     notFound();
   }
 
@@ -58,7 +58,7 @@ function EditBrandPage() {
             <CardDescription>Update this brand's details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {brand && <BrandForm brand={brand} />}
+            {brand && <BrandForm brand={brand as Brand} />}
         </CardContent>
       </Card>
     </>

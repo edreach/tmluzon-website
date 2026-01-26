@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { PricelistFile } from '@/lib/types';
+import type { PricelistFile, PricelistData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +40,7 @@ export default function PricelistPage() {
         () => (firestore ? collection(firestore, 'pricelists') : null),
         [firestore]
     );
-    const { data: pricelists, isLoading } = useCollection<PricelistFile>(pricelistsQuery);
+    const { data: pricelists, isLoading } = useCollection<PricelistData>(pricelistsQuery);
 
     const handleDelete = (pricelistId: string) => {
         if (!firestore || !pricelistId) return;
@@ -137,5 +137,3 @@ export default function PricelistPage() {
         </>
     );
 }
-
-    

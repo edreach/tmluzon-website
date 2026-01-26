@@ -2,13 +2,13 @@
 
 import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
-import type { SiteSettings, AboutUsContent, Brand } from '@/lib/types';
+import type { SiteSettings, BrandData, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const defaultContent: AboutUsContent = {
+const defaultContent = {
   intro_p1:
     'We as a young and dynamic company established on January 2015. We as an Air-conditioning company, which currently compose of Professional Mechanical Engineer; it has 20 employees, including office staff, service technicians, and Service Engineer and has the experience and expertise to successfully complete all types of residential, commercial and industrial projects.',
   intro_p2:
@@ -48,7 +48,7 @@ export default function AboutPage() {
       () => (firestore ? collection(firestore, 'brands') : null),
       [firestore]
   );
-  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
+  const { data: brands, isLoading: isLoadingBrands } = useCollection<BrandData>(brandsQuery);
 
   const content = siteSettings?.aboutUsContent || defaultContent;
   const isLoading = isLoadingSettings || isLoadingBrands;

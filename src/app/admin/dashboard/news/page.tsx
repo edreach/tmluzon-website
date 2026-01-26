@@ -13,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { NewsArticle } from '@/lib/types';
+import type { NewsArticle, NewsArticleData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +28,7 @@ export default function NewsPage() {
     () => (firestore ? collection(firestore, 'news') : null),
     [firestore]
   );
-  const { data: articles, isLoading } = useCollection<NewsArticle>(newsQuery);
+  const { data: articles, isLoading } = useCollection<NewsArticleData>(newsQuery);
 
   const handleDelete = (articleId: string) => {
     if (!firestore || !articleId) return;

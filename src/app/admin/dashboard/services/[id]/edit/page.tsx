@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ServiceForm from "../../../service-form";
 import { notFound, useParams } from "next/navigation";
-import type { Service } from "@/lib/types";
+import type { Service, ServiceData } from "@/lib/types";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,7 @@ function EditServicePage() {
       () => (firestore && id) ? doc(firestore, 'services', id) : null,
       [firestore, id]
   );
-  const { data: service, isLoading } = useDoc<Service>(serviceRef);
+  const { data: service, isLoading } = useDoc<ServiceData>(serviceRef);
   
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function EditServicePage() {
     );
   }
 
-  if (!service && !isLoading && serviceRef) {
+  if (!service && !isLoading) {
     notFound();
   }
 
@@ -58,7 +58,7 @@ function EditServicePage() {
             <CardDescription>Update your service details and use AI to enhance descriptions.</CardDescription>
         </CardHeader>
         <CardContent>
-            {service && <ServiceForm service={service} />}
+            {service && <ServiceForm service={service as Service} />}
         </CardContent>
       </Card>
     </>

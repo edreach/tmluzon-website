@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, orderBy, query } from 'firebase/firestore';
-import type { NewsArticle } from '@/lib/types';
+import type { NewsArticle, NewsArticleData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
@@ -14,7 +14,7 @@ export default function NewsPage() {
     () => (firestore ? query(collection(firestore, 'news'), orderBy('date', 'desc')) : null),
     [firestore]
   );
-  const { data: newsItems, isLoading } = useCollection<NewsArticle>(newsQuery);
+  const { data: newsItems, isLoading } = useCollection<NewsArticleData>(newsQuery);
 
   return (
     <div className="bg-background text-foreground">

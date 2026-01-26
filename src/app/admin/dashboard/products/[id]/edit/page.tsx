@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ProductForm from "../../../product-form";
 import { notFound, useParams } from "next/navigation";
-import type { Product } from "@/lib/types";
+import type { Product, ProductData } from "@/lib/types";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,7 @@ function EditProductPage() {
       () => (firestore && id) ? doc(firestore, 'products', id) : null,
       [firestore, id]
   );
-  const { data: product, isLoading } = useDoc<Product>(productRef);
+  const { data: product, isLoading } = useDoc<ProductData>(productRef);
   
   if (isLoading) {
     return (
@@ -47,7 +47,7 @@ function EditProductPage() {
     );
   }
 
-  if (!product && !isLoading && productRef) {
+  if (!product && !isLoading) {
     notFound();
   }
 
@@ -62,7 +62,7 @@ function EditProductPage() {
             <CardDescription>Update your product details and use AI to enhance descriptions.</CardDescription>
         </CardHeader>
         <CardContent>
-            {product && <ProductForm product={product} />}
+            {product && <ProductForm product={product as Product} />}
         </CardContent>
       </Card>
     </>

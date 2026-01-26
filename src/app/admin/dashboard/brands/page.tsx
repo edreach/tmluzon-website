@@ -26,7 +26,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Brand } from '@/lib/types';
+import type { Brand, BrandData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -41,7 +41,7 @@ export default function BrandsPage() {
         () => (firestore ? collection(firestore, 'brands') : null),
         [firestore]
     );
-    const { data: brands, isLoading } = useCollection<Brand>(brandsQuery);
+    const { data: brands, isLoading } = useCollection<BrandData>(brandsQuery);
 
     const handleDelete = (brandId: string) => {
         if (!firestore || !brandId) return;

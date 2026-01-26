@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
-import type { Service } from "@/lib/types";
+import type { Service, ServiceData } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ServicesPage() {
@@ -15,7 +15,7 @@ export default function ServicesPage() {
     () => (firestore ? query(collection(firestore, 'services')) : null),
     [firestore]
   );
-  const { data: services, isLoading } = useCollection<Service>(servicesQuery);
+  const { data: services, isLoading } = useCollection<ServiceData>(servicesQuery);
 
   return (
     <div className="bg-background text-foreground">
