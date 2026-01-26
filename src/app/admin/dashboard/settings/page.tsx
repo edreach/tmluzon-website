@@ -40,7 +40,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
@@ -54,7 +54,7 @@ export default function SettingsPage() {
     const storage = useStorage();
     const auth = useAuth();
     const { toast } = useToast();
-    const { isUserLoading: isAuthLoading } = useUser();
+    const { user: currentUser, isUserLoading: isAuthLoading } = useUser();
     const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
 
@@ -79,20 +79,11 @@ export default function SettingsPage() {
     );
     const { data: adminRoles, isLoading: isLoadingAdminRoles } = useCollection<AdminRole>(adminRolesQuery);
 
-    const adminRoleIds = adminRoles?.map(role => role.id) || [];
-    
-    const handleToggleAdmin = (userToUpdate: UserProfile & { id: string }) => {
-        if (!userToUpdate.uid || !firestore) return;
-        const isAdmin = adminRoleIds.includes(userToUpdate.uid);
-        const roleRef = doc(firestore, 'roles_admin', userToUpdate.uid);
-        if (isAdmin) {
-            deleteDocumentNonBlocking(roleRef);
-            toast({ title: "Admin Removed", description: `${userToUpdate.name} is no longer an admin.` });
-        } else {
-            setDocumentNonBlocking(roleRef, { uid: userToUpdate.uid }, { merge: true });
-            toast({ title: "Admin Added", description: `${userToUpdate.name} is now an admin.` });
-        }
-    };
+    const adminUsers = useMemo(() => {
+        if (!users || !adminRoles) return [];
+        const adminIds = new Set(adminRoles.map(role => role.id));
+        return users.filter(user => user.uid && adminIds.has(user.uid));
+    }, [users, adminRoles]);
     
     const handleAddUser = async () => {
         if (!newUser.name || !newUser.email || !newUser.password) {
@@ -120,7 +111,11 @@ export default function SettingsPage() {
                 email: newUser.email 
             });
 
-            toast({ title: 'User Created', description: `${newUser.name} has been created.` });
+            // Also add them to the admin roles
+            const adminRoleRef = doc(firestore, 'roles_admin', authUser.uid);
+            await setDoc(adminRoleRef, { uid: authUser.uid });
+
+            toast({ title: 'Administrator Created', description: `${newUser.name} has been created.` });
             setNewUser({ name: '', email: '', password: '' });
             setAddUserDialogOpen(false);
 
@@ -143,15 +138,17 @@ export default function SettingsPage() {
     };
     
     const handleDeleteUser = (userToDelete: UserProfile & { id: string }) => {
+        if (currentUser?.uid === userToDelete.uid) {
+            toast({ title: 'Action not allowed', description: 'You cannot delete your own account.', variant: 'destructive'});
+            return;
+        }
+
         if (!userToDelete.id || !userToDelete.uid || !firestore) return;
         
         deleteDocumentNonBlocking(doc(firestore, 'users', userToDelete.id));
-        
-        if(adminRoleIds.includes(userToDelete.uid)) {
-            deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userToDelete.uid));
-        }
+        deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userToDelete.uid));
 
-        toast({ title: 'User Deleted', description: `${userToDelete.name} has been removed.` });
+        toast({ title: 'Administrator Deleted', description: `${userToDelete.name} has been removed.` });
     }
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -249,23 +246,23 @@ export default function SettingsPage() {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>User Management</CardTitle>
+                                <CardTitle>Administrator Management</CardTitle>
                                 <CardDescription>
-                                    Manage administrators and users for your dashboard.
+                                    Manage administrator accounts for the dashboard.
                                 </CardDescription>
                             </div>
                             <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
                                 <DialogTrigger asChild>
                                      <Button>
                                         <UserPlus className="mr-2 h-4 w-4" />
-                                        Add User
+                                        Add Administrator
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Add New User</DialogTitle>
+                                        <DialogTitle>Add New Administrator</DialogTitle>
                                         <DialogDescription>
-                                            Enter the user's details. This will create their account in Firebase Authentication and sign you out. You will need to log back in.
+                                            Enter the new administrator's details. This will create their account and sign you out. You will need to log back in.
                                         </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
@@ -283,7 +280,7 @@ export default function SettingsPage() {
                                         </div>
                                     </div>
                                     <DialogFooter>
-                                        <Button onClick={handleAddUser}>Save User</Button>
+                                        <Button onClick={handleAddUser}>Save Administrator</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
@@ -295,7 +292,6 @@ export default function SettingsPage() {
                                 <TableRow>
                                     <TableHead>Name</TableHead>
                                     <TableHead>Email</TableHead>
-                                    <TableHead>Role</TableHead>
                                     <TableHead>
                                         <span className="sr-only">Actions</span>
                                     </TableHead>
@@ -304,30 +300,22 @@ export default function SettingsPage() {
                             <TableBody>
                                 {isLoading && (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center">Loading users...</TableCell>
+                                        <TableCell colSpan={3} className="text-center">Loading users...</TableCell>
                                     </TableRow>
                                 )}
-                                {!isLoading && users?.map((user) => (
+                                {!isLoading && adminUsers?.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell className="font-medium">{user.name}</TableCell>
                                         <TableCell>{user.email}</TableCell>
-                                        <TableCell>{user.uid && adminRoleIds.includes(user.uid) ? "Administrator" : "User"}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
+                                                    <Button variant="ghost" size="icon" disabled={currentUser?.uid === user.uid}>
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleToggleAdmin(user)}>
-                                                        {user.uid && adminRoleIds.includes(user.uid) ? (
-                                                            <><ShieldOff className="mr-2 h-4 w-4" />Remove Admin</>
-                                                        ) : (
-                                                            <><Shield className="mr-2 h-4 w-4" />Make Admin</>
-                                                        )}
-                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteUser(user)}>
                                                         <Trash2 className="mr-2 h-4 w-4" />
                                                         Delete
@@ -337,9 +325,9 @@ export default function SettingsPage() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                {!isLoading && !users?.length && (
+                                {!isLoading && !adminUsers?.length && (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center">No users found. Click "Add User" to start.</TableCell>
+                                        <TableCell colSpan={3} className="text-center">No administrators found. Click "Add Administrator" to start.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
@@ -349,5 +337,4 @@ export default function SettingsPage() {
             </div>
         </>
     );
-
-    
+}
