@@ -92,32 +92,21 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
       return;
     }
 
-    try {
-      const isNew = service.id === 'new';
-      
-      if (isNew) {
-        addDocumentNonBlocking(collection(firestore, 'services'), parsed.data);
-      } else {
-        setDocumentNonBlocking(doc(firestore, 'services', service.id), parsed.data, { merge: true });
-      }
-      
-      toast({
-          title: 'Service Saved',
-          description: 'Your service has been saved successfully.',
-      });
-
-      router.push('/admin/dashboard/services');
-
-    } catch (error: any) {
-        console.error("Error saving service: ", error);
-        toast({
-            title: 'Save Error',
-            description: error.message || 'An unexpected error occurred.',
-            variant: 'destructive',
-        });
-    } finally {
-        setIsSaving(false);
+    const isNew = service.id === 'new';
+    
+    if (isNew) {
+      addDocumentNonBlocking(collection(firestore, 'services'), parsed.data);
+    } else {
+      setDocumentNonBlocking(doc(firestore, 'services', service.id), parsed.data, { merge: true });
     }
+    
+    toast({
+        title: 'Service Saved',
+        description: 'Your service has been saved successfully.',
+    });
+
+    router.push('/admin/dashboard/services');
+    setIsSaving(false);
   };
 
   return (

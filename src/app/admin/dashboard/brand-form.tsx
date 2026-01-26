@@ -113,32 +113,22 @@ export default function BrandForm({ brand: initialBrand }: { brand: Brand }) {
       return;
     }
 
-    try {
-      const isNew = brand.id === 'new';
+    const isNew = brand.id === 'new';
 
-      if (isNew) {
-        addDocumentNonBlocking(collection(firestore, 'brands'), parsed.data);
-      } else {
-        setDocumentNonBlocking(doc(firestore, 'brands', brand.id), parsed.data, { merge: true });
-      }
-
-      toast({
-        title: 'Brand Saved',
-        description: 'The brand has been saved successfully.',
-      });
-
-      router.push('/admin/dashboard/brands');
-      router.refresh();
-    } catch (error: any) {
-      console.error('Error saving brand: ', error);
-      toast({
-        title: 'Save Error',
-        description: error.message || 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
+    if (isNew) {
+      addDocumentNonBlocking(collection(firestore, 'brands'), parsed.data);
+    } else {
+      setDocumentNonBlocking(doc(firestore, 'brands', brand.id), parsed.data, { merge: true });
     }
+
+    toast({
+      title: 'Brand Saved',
+      description: 'The brand has been saved successfully.',
+    });
+
+    router.push('/admin/dashboard/brands');
+    router.refresh();
+    setIsSaving(false);
   };
 
   return (

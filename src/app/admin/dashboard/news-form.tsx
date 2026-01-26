@@ -114,32 +114,22 @@ export default function NewsForm({ article: initialArticle }: { article: NewsArt
       setIsSaving(false);
       return;
     }
+    
+    const isNew = article.id === 'new';
 
-    try {
-      const isNew = article.id === 'new';
-
-      if (isNew) {
-        addDocumentNonBlocking(collection(firestore, 'news'), parsed.data);
-      } else {
-        setDocumentNonBlocking(doc(firestore, 'news', article.id), parsed.data, { merge: true });
-      }
-
-      toast({
-        title: 'Article Saved',
-        description: 'Your news article has been saved successfully.',
-      });
-
-      router.push('/admin/dashboard/news');
-    } catch (error: any) {
-      console.error('Error saving article: ', error);
-      toast({
-        title: 'Save Error',
-        description: error.message || 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSaving(false);
+    if (isNew) {
+      addDocumentNonBlocking(collection(firestore, 'news'), parsed.data);
+    } else {
+      setDocumentNonBlocking(doc(firestore, 'news', article.id), parsed.data, { merge: true });
     }
+
+    toast({
+      title: 'Article Saved',
+      description: 'Your news article has been saved successfully.',
+    });
+
+    router.push('/admin/dashboard/news');
+    setIsSaving(false);
   };
 
   return (

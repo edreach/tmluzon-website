@@ -181,32 +181,21 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
       return;
     }
 
-    try {
-      const isNew = product.id === 'new';
-      
-      if (isNew) {
-        addDocumentNonBlocking(collection(firestore, 'products'), parsed.data);
-      } else {
-        setDocumentNonBlocking(doc(firestore, 'products', product.id), parsed.data, { merge: true });
-      }
-      
-      toast({
-          title: 'Product Saved',
-          description: 'Your product has been saved successfully.',
-      });
-
-      router.push('/admin/dashboard');
-
-    } catch (error: any) {
-        console.error("Error saving product: ", error);
-        toast({
-            title: 'Save Error',
-            description: error.message || 'An unexpected error occurred.',
-            variant: 'destructive',
-        });
-    } finally {
-        setIsSaving(false);
+    const isNew = product.id === 'new';
+    
+    if (isNew) {
+      addDocumentNonBlocking(collection(firestore, 'products'), parsed.data);
+    } else {
+      setDocumentNonBlocking(doc(firestore, 'products', product.id), parsed.data, { merge: true });
     }
+    
+    toast({
+        title: 'Product Saved',
+        description: 'Your product has been saved successfully.',
+    });
+
+    router.push('/admin/dashboard');
+    setIsSaving(false);
   };
 
   return (

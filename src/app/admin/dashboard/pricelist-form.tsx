@@ -116,32 +116,21 @@ export default function PricelistForm({ pricelist: initialPricelist }: { priceli
       return;
     }
 
-    try {
-      const isNew = pricelist.id === 'new';
-      
-      if (isNew) {
-        addDocumentNonBlocking(collection(firestore, 'pricelists'), parsed.data);
-      } else {
-        setDocumentNonBlocking(doc(firestore, 'pricelists', pricelist.id), parsed.data, { merge: true });
-      }
-      
-      toast({
-          title: 'Pricelist Saved',
-          description: 'Your pricelist has been saved successfully.',
-      });
-
-      router.push('/admin/dashboard/pricelist');
-
-    } catch (error: any) {
-        console.error("Error saving pricelist: ", error);
-        toast({
-            title: 'Save Error',
-            description: error.message || 'An unexpected error occurred.',
-            variant: 'destructive',
-        });
-    } finally {
-        setIsSaving(false);
+    const isNew = pricelist.id === 'new';
+    
+    if (isNew) {
+      addDocumentNonBlocking(collection(firestore, 'pricelists'), parsed.data);
+    } else {
+      setDocumentNonBlocking(doc(firestore, 'pricelists', pricelist.id), parsed.data, { merge: true });
     }
+    
+    toast({
+        title: 'Pricelist Saved',
+        description: 'Your pricelist has been saved successfully.',
+    });
+
+    router.push('/admin/dashboard/pricelist');
+    setIsSaving(false);
   };
 
   return (
