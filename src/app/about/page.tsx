@@ -1,8 +1,8 @@
 'use client';
 
 import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
-import type { SiteSettings, BrandData, Brand } from '@/lib/types';
+import { collection, doc, query, orderBy } from 'firebase/firestore';
+import type { SiteSettings, Brand, BrandData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
@@ -45,7 +45,7 @@ export default function AboutPage() {
   const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
   
   const brandsQuery = useMemoFirebase(
-      () => (firestore ? collection(firestore, 'brands') : null),
+      () => (firestore ? query(collection(firestore, 'brands'), orderBy('sortOrder')) : null),
       [firestore]
   );
   const { data: brands, isLoading: isLoadingBrands } = useCollection<BrandData>(brandsQuery);

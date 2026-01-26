@@ -359,7 +359,8 @@
         "name": { "type": "string" },
         "logoUrl": { "type": "string", "format": "uri" },
         "websiteUrl": { "type": "string", "format": "uri" },
-        "imageHint": { "type": "string" }
+        "imageHint": { "type": "string" },
+        "sortOrder": { "type": "number", "description": "A number to control the display order on the public site. Lower numbers appear first." }
       },
       "required": ["name", "logoUrl"]
     },

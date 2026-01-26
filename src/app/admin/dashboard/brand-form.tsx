@@ -21,6 +21,10 @@ const BrandFormSchema = z.object({
   logoUrl: z.string().url('A logo image must be uploaded.'),
   websiteUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   imageHint: z.string().optional(),
+  sortOrder: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.coerce.number().optional()
+  ),
 });
 
 export default function BrandForm({ brand: initialBrand }: { brand: Brand }) {
@@ -133,9 +137,15 @@ export default function BrandForm({ brand: initialBrand }: { brand: Brand }) {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="name">Brand Name</Label>
-        <Input id="name" name="name" value={brand.name} onChange={handleInputChange} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="name">Brand Name</Label>
+          <Input id="name" name="name" value={brand.name} onChange={handleInputChange} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="sortOrder">Sort Order (Optional)</Label>
+            <Input id="sortOrder" name="sortOrder" type="number" value={brand.sortOrder || ''} onChange={handleInputChange} placeholder="e.g., 1, 2, 3..."/>
+        </div>
       </div>
 
       <div className="space-y-2">

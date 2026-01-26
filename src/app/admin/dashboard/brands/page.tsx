@@ -26,9 +26,9 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Brand, BrandData } from '@/lib/types';
+import type { BrandData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
@@ -38,7 +38,7 @@ export default function BrandsPage() {
     const { toast } = useToast();
 
     const brandsQuery = useMemoFirebase(
-        () => (firestore ? collection(firestore, 'brands') : null),
+        () => (firestore ? query(collection(firestore, 'brands'), orderBy('sortOrder', 'asc')) : null),
         [firestore]
     );
     const { data: brands, isLoading } = useCollection<BrandData>(brandsQuery);
@@ -74,7 +74,7 @@ export default function BrandsPage() {
                 <CardHeader>
                     <div>
                         <CardTitle>Manage Brands</CardTitle>
-                        <CardDescription>Add, edit, or delete partner brands.</CardDescription>
+                        <CardDescription>Add, edit, or delete partner brands. Brands are ordered by the 'Sort Order' value on the public site.</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -83,6 +83,7 @@ export default function BrandsPage() {
                             <TableRow>
                                 <TableHead className="w-24">Logo</TableHead>
                                 <TableHead>Name</TableHead>
+                                <TableHead className="w-24">Sort Order</TableHead>
                                 <TableHead>Website URL</TableHead>
                                 <TableHead>
                                     <span className="sr-only">Actions</span>
@@ -95,6 +96,7 @@ export default function BrandsPage() {
                                     <TableRow key={i}>
                                         <TableCell><Skeleton className="h-10 w-16" /></TableCell>
                                         <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                                         <TableCell><Skeleton className="h-5 w-64" /></TableCell>
                                         <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                                     </TableRow>
@@ -108,6 +110,7 @@ export default function BrandsPage() {
                                         </div>
                                      </TableCell>
                                     <TableCell className="font-medium">{brand.name}</TableCell>
+                                    <TableCell>{brand.sortOrder ?? 'N/A'}</TableCell>
                                     <TableCell>
                                         <a href={brand.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
                                             {brand.websiteUrl}
@@ -135,7 +138,7 @@ export default function BrandsPage() {
                             ))}
                              {!isLoading && brands?.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">No brands found.</TableCell>
+                                    <TableCell colSpan={5} className="text-center h-24">No brands found.</TableCell>
                                 </TableRow>
                              )}
                         </TableBody>

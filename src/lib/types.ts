@@ -105,6 +105,7 @@ export type BrandData = {
   logoUrl: string;
   websiteUrl?: string;
   imageHint?: string;
+  sortOrder?: number;
 };
 export type Brand = BrandData & { id: string };
 
