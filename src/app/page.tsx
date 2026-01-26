@@ -13,8 +13,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import type { Product, ProductData } from '@/lib/types';
+import { collection, query, where, limit } from 'firebase/firestore';
+import type { Product, ProductData, ServiceData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -23,28 +23,13 @@ export default function Home() {
     () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
     [firestore]
   );
-  const { data: productListings, isLoading } = useCollection<ProductData>(productsQuery);
+  const { data: productListings, isLoading: isLoadingProducts } = useCollection<ProductData>(productsQuery);
 
-  const services = [
-    {
-      title: "Fast & Reliable Aircon Repair",
-      description: "Facing a broken AC? Our certified technicians provide fast, expert repair for any aircon problem, offering honest, long-lasting solutions with transparent pricing ...",
-      imageUrl: "https://picsum.photos/seed/aircon-repair/600/400",
-      imageHint: "person sunset"
-    },
-    {
-      title: "Keep Your Cool & Lower Your Bills: Expert Aircon Maintenance",
-      description: "Invest in worry-free comfort with our Aircon Preventive Maintenance Service. We restore peak efficiency, lower energy costs, and prevent costly breakdowns through...",
-      imageUrl: "https://picsum.photos/seed/aircon-maintenance/600/400",
-      imageHint: "person field"
-    },
-    {
-      title: "The Ultimate Cooling Solution: Expert AC Planning, Design & Installation",
-      description: "Our integrated service provides expert planning, design, and installation of highly efficient cooling systems for new homes and major renovations in Bacoor. We ensu...",
-      imageUrl: "https://picsum.photos/seed/aircon-install/600/400",
-      imageHint: "person light"
-    }
-  ];
+  const servicesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'services'), limit(3)) : null),
+    [firestore]
+  );
+  const { data: services, isLoading: isLoadingServices } = useCollection<ServiceData>(servicesQuery);
 
   const features = [
     {
@@ -115,29 +100,49 @@ export default function Home() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.title} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl">
-              <div className="relative w-full h-48">
-                <Image
-                  src={service.imageUrl}
-                  alt={service.title}
-                  fill
-                  className="object-cover"
-                  data-ai-hint={service.imageHint}
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold h-20">{service.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {service.description}
-                </p>
-              </div>
-            </Card>
-          ))}
+          {isLoadingServices ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden rounded-xl shadow-lg">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-6">
+                  <Skeleton className="h-6 w-3/4 mb-4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full mt-2" />
+                  <Skeleton className="h-4 w-2/3 mt-2" />
+                   <Skeleton className="h-10 w-full mt-4" />
+                </div>
+              </Card>
+            ))
+          ) : (
+            services?.map((service) => (
+              <Card key={service.id} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl flex flex-col">
+                <div className="relative w-full h-48 bg-muted">
+                  <Image
+                    src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/600/400`}
+                    alt={service.name}
+                    fill
+                    className="object-cover"
+                    data-ai-hint="service technician"
+                  />
+                </div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-lg font-bold h-14">{service.name}</h3>
+                  <p className="text-muted-foreground text-sm h-24 overflow-hidden text-ellipsis">
+                    {service.description}
+                  </p>
+                  <Button asChild className="w-full mt-auto">
+                    <Link href={`/services/${service.id}`}>View Details</Link>
+                  </Button>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
 
         <div className="mt-16 text-center">
-          <Button size="lg">View All Services</Button>
+          <Button size="lg" asChild>
+            <Link href="/services">View All Services</Link>
+          </Button>
         </div>
 
         <div className="mt-24 text-center">
@@ -180,7 +185,7 @@ export default function Home() {
               className="w-full max-w-6xl mx-auto"
             >
               <CarouselContent>
-                {isLoading ? (
+                {isLoadingProducts ? (
                   Array.from({ length: 4 }).map((_, i) => (
                     <CarouselItem key={i} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                       <div className="p-1 h-full">
