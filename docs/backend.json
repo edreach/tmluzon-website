@@ -83,16 +83,11 @@
         "description": {
           "type": "string",
           "description": "Detailed description of the service."
-        },
-        "price": {
-          "type": "number",
-          "description": "The price of the service."
         }
       },
       "required": [
         "name",
-        "description",
-        "price"
+        "description"
       ]
     },
     "CustomerReview": {

@@ -21,7 +21,6 @@ interface ServiceFormProps {
 
 const ServiceFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
-  price: z.coerce.number().positive("Price must be a positive number."),
   description: z.string().min(10, "Description must be at least 10 characters."),
 });
 
@@ -75,10 +74,7 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
         return;
     }
 
-    const serviceToValidate = {
-        ...service,
-        price: Number(service.price) || 0,
-    };
+    const serviceToValidate = { ...service };
 
     const parsed = ServiceFormSchema.safeParse(serviceToValidate);
 
@@ -92,12 +88,13 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
       return;
     }
 
-    const isNew = service.id === 'new';
+    const { id, ...serviceData } = service;
+    const isNew = id === 'new';
     
     if (isNew) {
-      addDocumentNonBlocking(collection(firestore, 'services'), parsed.data);
+      addDocumentNonBlocking(collection(firestore, 'services'), serviceData);
     } else {
-      setDocumentNonBlocking(doc(firestore, 'services', service.id), parsed.data, { merge: true });
+      setDocumentNonBlocking(doc(firestore, 'services', id), serviceData, { merge: true });
     }
     
     toast({
@@ -114,10 +111,6 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
       <div className="space-y-2">
         <Label htmlFor="name">Service Name</Label>
         <Input id="name" name="name" value={service.name} onChange={handleInputChange} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="price">Price</Label>
-        <Input id="price" name="price" type="number" value={service.price} onChange={handleInputChange} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>

@@ -31,7 +31,6 @@ export default function ServiceDetailPage() {
           </div>
           <div className="space-y-6">
             <Skeleton className="h-10 w-3/4" />
-            <Skeleton className="h-6 w-1/4" />
             <div className="space-y-2">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
@@ -69,9 +68,6 @@ export default function ServiceDetailPage() {
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-4">{service.name}</h1>
-            <p className="text-2xl text-muted-foreground mb-6">
-              ₱{service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
             <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap">
               <p>{service.description}</p>
             </div>

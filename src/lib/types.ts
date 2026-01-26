@@ -40,7 +40,6 @@ export type CartItem = {
 
 export type ServiceData = {
   name: string;
-  price: number;
   description: string;
 };
 export type Service = ServiceData & { id: string };

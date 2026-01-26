@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
-import { Sparkles, Trash2, Upload } from "lucide-react";
+import { Sparkles, Trash2, Upload, Star } from "lucide-react";
 import { enhanceProductDescription } from "@/ai/flows/ai-product-description-augmentation";
 import { useRouter } from "next/navigation";
 import { useFirestore, useStorage, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
@@ -56,14 +56,14 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
   const storage = useStorage();
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialProduct.imageUrls);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialProduct.imageUrls || []);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
  
 
   useEffect(() => {
     setProduct(initialProduct);
-    setImageUrls(initialProduct.imageUrls);
+    setImageUrls(initialProduct.imageUrls || []);
   }, [initialProduct]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -151,6 +151,13 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
 
   const handleRemoveImage = (urlToRemove: string) => {
       setImageUrls(prev => prev.filter(url => url !== urlToRemove));
+  };
+
+  const handleSetPrimaryImage = (urlToMakePrimary: string) => {
+    setImageUrls(prev => [
+        urlToMakePrimary,
+        ...prev.filter(url => url !== urlToMakePrimary)
+    ]);
   };
   
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -242,11 +249,28 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
         <Label htmlFor="images">Product Images</Label>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
             {imageUrls.map((url, index) => (
-                <div key={index} className="relative aspect-square">
+                <div key={index} className="relative aspect-square group/image">
                     <Image src={url} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />
-                    <Button type="button" variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 z-10" onClick={() => handleRemoveImage(url)}>
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="absolute top-1 right-1 flex flex-col gap-1 z-10">
+                        <Button type="button" variant="destructive" size="icon" className="h-6 w-6" onClick={() => handleRemoveImage(url)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant={index === 0 ? "secondary" : "ghost"} 
+                            size="icon" 
+                            className="h-6 w-6 bg-background/70 hover:bg-background"
+                            onClick={() => handleSetPrimaryImage(url)}
+                            title="Mark as primary image"
+                        >
+                            <Star className={`h-4 w-4 ${index === 0 ? 'text-yellow-400 fill-yellow-400' : 'text-foreground/50'}`} />
+                        </Button>
+                    </div>
+                    {index === 0 && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5 rounded-b-md">
+                            Primary
+                        </div>
+                    )}
                 </div>
             ))}
             <div className="relative aspect-square flex items-center justify-center border-2 border-dashed rounded-md">

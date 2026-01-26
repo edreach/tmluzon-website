@@ -6,7 +6,6 @@ export default function NewServicePage() {
   const newService: Service = {
       id: 'new',
       name: '',
-      price: 0,
       description: '',
   }
 
