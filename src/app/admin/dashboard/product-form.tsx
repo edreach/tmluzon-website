@@ -50,6 +50,7 @@ const ProductFormSchema = z.object({
   imageUrls: z.array(z.string().url()).min(1, "At least one image is required."),
   specifications: z.array(z.object({ name: z.string(), value: z.string()})).optional(),
   discontinued: z.boolean().default(false),
+  showPrice: z.boolean().default(true),
   stockStatus: z.enum(['In Stock', 'Out of Stock', 'Made to Order']).optional(),
 });
 
@@ -252,20 +253,37 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
               </SelectContent>
             </Select>
         </div>
-        <div className="flex items-center space-x-2 md:col-span-2">
-          <Checkbox
-            id="discontinued"
-            checked={product.discontinued || false}
-            onCheckedChange={(checked) => {
-              setProduct(prev => ({...prev, discontinued: checked === true}));
-            }}
-          />
-          <label
-            htmlFor="discontinued"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Discontinue this product (it will not be shown on the public site)
-          </label>
+        <div className="md:col-span-2 space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="discontinued"
+              checked={product.discontinued || false}
+              onCheckedChange={(checked) => {
+                setProduct(prev => ({...prev, discontinued: checked === true}));
+              }}
+            />
+            <label
+              htmlFor="discontinued"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Discontinue this product (it will not be shown on the public site)
+            </label>
+          </div>
+           <div className="flex items-center space-x-2">
+            <Checkbox
+              id="showPrice"
+              checked={product.showPrice !== false}
+              onCheckedChange={(checked) => {
+                setProduct(prev => ({...prev, showPrice: checked === true}));
+              }}
+            />
+            <label
+              htmlFor="showPrice"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show price on the public site
+            </label>
+          </div>
         </div>
       </div>
       

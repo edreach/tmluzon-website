@@ -109,7 +109,12 @@ export default function Dashboard() {
                                         <Badge variant="secondary">{product.brand}</Badge>
                                     </TableCell>
                                     <TableCell>{product.type}</TableCell>
-                                    <TableCell className="text-right">₱{product.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                    <TableCell className="text-right">
+                                        {product.showPrice !== false
+                                            ? `₱${product.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                            : <span className="text-muted-foreground">Hidden</span>
+                                        }
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>

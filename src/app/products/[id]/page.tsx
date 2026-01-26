@@ -141,7 +141,9 @@ export default function ProductDetailPage() {
                     </Badge>
                 )}
             </div>
-            <p className="text-2xl font-semibold text-primary mb-4">₱{product?.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            {product?.showPrice !== false && (
+                <p className="text-2xl font-semibold text-primary mb-4">₱{product?.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            )}
             <div className="text-base text-foreground/80 space-y-4 mb-6">
               <p>{product?.description}</p>
             </div>

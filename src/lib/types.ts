@@ -21,6 +21,7 @@ export type ProductData = {
   subType: string;
   discontinued?: boolean;
   stockStatus?: 'In Stock' | 'Out of Stock' | 'Made to Order';
+  showPrice?: boolean;
 };
 export type Product = ProductData & { id: string };
 

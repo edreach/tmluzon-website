@@ -15,6 +15,7 @@ export default function NewProductPage() {
       specifications: [],
       discontinued: false,
       stockStatus: 'In Stock',
+      showPrice: true,
   }
 
   return (

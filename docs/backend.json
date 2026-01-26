@@ -40,6 +40,10 @@
           "type": "number",
           "description": "The price of the product."
         },
+        "showPrice": {
+          "type": "boolean",
+          "description": "Whether to display the price on the public site."
+        },
         "type": {
           "type": "string",
           "description": "The type of the product (e.g., Wall Mounted, Floor Mounted)."
