@@ -36,15 +36,15 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
-      <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-16 items-center">
+      <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-20 items-center">
         
         {/* LEFT: Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center space-x-2">
             {isLoadingSettings ? (
-                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-16 w-40" />
             ) : siteSettings?.logoUrl ? (
-                <div className="relative h-10 w-32">
+                <div className="relative h-16 w-40">
                     <Image
                         src={siteSettings.logoUrl}
                         alt="TM Luzon Logo"
@@ -113,9 +113,9 @@ export default function Header() {
                         <SheetTitle>
                             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                                 {isLoadingSettings ? (
-                                    <Skeleton className="h-8 w-32" />
+                                    <Skeleton className="h-16 w-40" />
                                 ) : siteSettings?.logoUrl ? (
-                                    <div className="relative h-10 w-32">
+                                    <div className="relative h-16 w-40">
                                         <Image
                                             src={siteSettings.logoUrl}
                                             alt="TM Luzon Logo"
