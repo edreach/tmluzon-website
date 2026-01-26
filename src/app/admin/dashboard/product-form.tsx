@@ -19,6 +19,13 @@ import { Progress } from "@/components/ui/progress";
 import { z } from "zod";
 import { collection, doc } from "firebase/firestore";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -43,6 +50,7 @@ const ProductFormSchema = z.object({
   imageUrls: z.array(z.string().url()).min(1, "At least one image is required."),
   specifications: z.array(z.object({ name: z.string(), value: z.string()})).optional(),
   discontinued: z.boolean().default(false),
+  stockStatus: z.enum(['In Stock', 'Out of Stock', 'Made to Order']).optional(),
 });
 
 
@@ -224,9 +232,25 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
             <Label htmlFor="type">Type</Label>
             <Input id="type" name="type" value={product.type || ''} onChange={handleInputChange} />
         </div>
-         <div className="space-y-2 md:col-span-2">
+         <div className="space-y-2">
             <Label htmlFor="subType">Sub-Type</Label>
             <Input id="subType" name="subType" value={product.subType || ''} onChange={handleInputChange} />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="stockStatus">Stock Status</Label>
+            <Select
+              value={product.stockStatus || 'In Stock'}
+              onValueChange={(value) => setProduct(prev => ({...prev, stockStatus: value as 'In Stock' | 'Out of Stock' | 'Made to Order'}))}
+            >
+              <SelectTrigger id="stockStatus">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="In Stock">In Stock</SelectItem>
+                <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                <SelectItem value="Made to Order">Made to Order</SelectItem>
+              </SelectContent>
+            </Select>
         </div>
         <div className="flex items-center space-x-2 md:col-span-2">
           <Checkbox

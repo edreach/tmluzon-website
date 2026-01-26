@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import AddToCartButton from '@/components/add-to-cart-button';
@@ -18,6 +18,7 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from '@/components/ui/badge';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -125,18 +126,46 @@ export default function ProductDetailPage() {
             )}
           </div>
           <div className="flex flex-col">
-            <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-2">{product?.name}</h1>
+            <div className="flex flex-wrap items-start justify-between gap-y-2 mb-2">
+                <h1 className="text-3xl lg:text-4xl font-bold font-headline">{product?.name}</h1>
+                {product?.stockStatus && (
+                    <Badge
+                        variant={
+                            product.stockStatus === 'In Stock' ? 'default' :
+                            product.stockStatus === 'Out of Stock' ? 'destructive' :
+                            'secondary'
+                        }
+                        className="text-base"
+                    >
+                        {product.stockStatus}
+                    </Badge>
+                )}
+            </div>
             <p className="text-2xl font-semibold text-primary mb-4">₱{product?.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             <div className="text-base text-foreground/80 space-y-4 mb-6">
               <p>{product?.description}</p>
             </div>
             
-            <div className="flex items-center gap-2 text-sm text-green-600 mb-6">
-                <CheckCircle className="h-5 w-5" />
-                <span>In Stock & Ready to Ship</span>
-            </div>
+            {product?.stockStatus === 'In Stock' && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                    <CheckCircle className="h-5 w-5" />
+                    <span>In Stock & Ready to Ship</span>
+                </div>
+            )}
+            {product?.stockStatus === 'Out of Stock' && (
+                 <div className="flex items-center gap-2 text-sm text-destructive mb-6">
+                    <XCircle className="h-5 w-5" />
+                    <span>Currently unavailable</span>
+                </div>
+            )}
+             {product?.stockStatus === 'Made to Order' && (
+                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+                    <Clock className="h-5 w-5" />
+                    <span>Made to order - may take longer to ship</span>
+                </div>
+            )}
 
-            {fullProduct && <AddToCartButton product={fullProduct} />}
+            {fullProduct && product.stockStatus !== 'Out of Stock' && <AddToCartButton product={fullProduct} />}
 
             {product?.specifications && product.specifications.length > 0 && (
                 <div className="mt-8">

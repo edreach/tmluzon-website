@@ -14,6 +14,7 @@ export default function NewProductPage() {
       imageUrls: [],
       specifications: [],
       discontinued: false,
+      stockStatus: 'In Stock',
   }
 
   return (

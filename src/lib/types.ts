@@ -20,6 +20,7 @@ export type ProductData = {
   brand: string;
   subType: string;
   discontinued?: boolean;
+  stockStatus?: 'In Stock' | 'Out of Stock' | 'Made to Order';
 };
 export type Product = ProductData & { id: string };
 
