@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!service) {
+  if (!isLoading && !service) {
     notFound();
   }
 
@@ -56,29 +56,31 @@ export default function ServiceDetailPage() {
                 Back to Services
             </Link>
         </Button>
-      <div className="grid md:grid-cols-2 gap-12">
-        <div className="relative aspect-square w-full bg-muted rounded-xl overflow-hidden">
-            <Image
-                src={`https://picsum.photos/seed/${service.id}/800/800`}
-                alt={service.name}
-                fill
-                className="object-cover"
-                data-ai-hint="service technician"
-            />
-        </div>
-        <div className="flex flex-col justify-center">
-          <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-4">{service.name}</h1>
-          <p className="text-2xl text-muted-foreground mb-6">
-            ₱{service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-          <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap">
-            <p>{service.description}</p>
+      {service && (
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="relative aspect-square w-full bg-muted rounded-xl overflow-hidden">
+              <Image
+                  src={`https://picsum.photos/seed/${service.id}/800/800`}
+                  alt={service.name}
+                  fill
+                  className="object-cover"
+                  data-ai-hint="service technician"
+              />
           </div>
-          <Button size="lg" className="mt-8">
-            Inquire About This Service
-          </Button>
+          <div className="flex flex-col justify-center">
+            <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-4">{service.name}</h1>
+            <p className="text-2xl text-muted-foreground mb-6">
+              ₱{service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap">
+              <p>{service.description}</p>
+            </div>
+            <Button size="lg" className="mt-8">
+              Inquire About This Service
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
