@@ -17,7 +17,7 @@ function EditNewsArticlePage() {
     () => (firestore && id ? doc(firestore, 'news', id) : null),
     [firestore, id]
   );
-  const { data: article, isLoading } = useDoc<NewsArticle>(articleRef);
+  const { data: article, isLoading } = useDoc<Omit<NewsArticle, 'id'>>(articleRef);
 
   if (isLoading) {
     return (

@@ -17,7 +17,7 @@ function EditBrandPage() {
       () => (firestore && id) ? doc(firestore, 'brands', id) : null,
       [firestore, id]
   );
-  const { data: brand, isLoading } = useDoc<Brand>(brandRef);
+  const { data: brand, isLoading } = useDoc<Omit<Brand, 'id'>>(brandRef);
   
   if (isLoading) {
     return (

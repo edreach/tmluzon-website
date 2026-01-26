@@ -46,9 +46,6 @@ function EditPricelistPage() {
   if (!pricelist && !isLoading) {
     notFound();
   }
-  
-  const pricelistWithId: PricelistFile | null = pricelist ? { ...pricelist.data, id: pricelist.id } : null;
-
 
   return (
     <>
@@ -57,11 +54,11 @@ function EditPricelistPage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {pricelistWithId?.title}</CardTitle>
+            <CardTitle>Edit: {pricelist?.title}</CardTitle>
             <CardDescription>Update your pricelist details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {pricelistWithId && <PricelistForm pricelist={pricelistWithId} />}
+            {pricelist && <PricelistForm pricelist={pricelist as PricelistFile} />}
         </CardContent>
       </Card>
     </>
