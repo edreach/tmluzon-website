@@ -267,11 +267,14 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
             {isAiLoading ? 'Enhancing...' : 'Enhance with AI'}
         </Button>
       </div>
-      <Button type="submit" disabled={isSaving || isUploading}>
-        {isSaving ? "Saving..." : "Save Service"}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button type="submit" disabled={isSaving || isUploading}>
+            {isSaving ? "Saving..." : "Save Service"}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.push('/admin/dashboard/services')} disabled={isSaving || isUploading}>
+            Cancel
+        </Button>
+      </div>
     </form>
   );
 }
-
-    
