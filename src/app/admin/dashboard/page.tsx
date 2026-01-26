@@ -27,8 +27,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import type { Product, ProductData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,14 +46,8 @@ export default function Dashboard() {
     const handleDelete = (productId: string) => {
         if (!firestore || !productId) return;
         if (confirm('Are you sure you want to delete this product?')) {
-            deleteDoc(doc(firestore, 'products', productId))
-                .then(() => {
-                    toast({ title: 'Product Deleted', description: 'The product has been successfully removed.' });
-                })
-                .catch((error) => {
-                    console.error("Error deleting document: ", error);
-                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the product.' });
-                });
+            deleteDocumentNonBlocking(doc(firestore, 'products', productId));
+            toast({ title: 'Product Deleted', description: 'The product has been successfully removed.' });
         }
     };
 

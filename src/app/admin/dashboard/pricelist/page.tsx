@@ -26,9 +26,9 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { PricelistFile, PricelistData } from '@/lib/types';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import type { PricelistFile, PricelistData } from "@/lib/types";
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -45,14 +45,8 @@ export default function PricelistPage() {
     const handleDelete = (pricelistId: string) => {
         if (!firestore || !pricelistId) return;
         if (confirm('Are you sure you want to delete this pricelist? This action cannot be undone.')) {
-            deleteDoc(doc(firestore, 'pricelists', pricelistId))
-                .then(() => {
-                    toast({ title: 'Pricelist Deleted', description: 'The pricelist has been successfully removed.' });
-                })
-                .catch((error) => {
-                    console.error("Error deleting document: ", error);
-                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the pricelist.' });
-                });
+            deleteDocumentNonBlocking(doc(firestore, 'pricelists', pricelistId));
+            toast({ title: 'Pricelist Deleted', description: 'The pricelist has been successfully removed.' });
         }
     };
 

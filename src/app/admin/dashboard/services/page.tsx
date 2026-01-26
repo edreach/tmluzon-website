@@ -27,8 +27,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Service, ServiceData } from '@/lib/types';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -46,14 +46,8 @@ export default function ServicesPage() {
     const handleDelete = (serviceId: string) => {
         if (!firestore || !serviceId) return;
         if (confirm('Are you sure you want to delete this service?')) {
-            deleteDoc(doc(firestore, 'services', serviceId))
-                .then(() => {
-                    toast({ title: 'Service Deleted', description: 'The service has been successfully removed.' });
-                })
-                .catch((error) => {
-                    console.error("Error deleting document: ", error);
-                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the service.' });
-                });
+            deleteDocumentNonBlocking(doc(firestore, 'services', serviceId));
+            toast({ title: 'Service Deleted', description: 'The service has been successfully removed.' });
         }
     };
 

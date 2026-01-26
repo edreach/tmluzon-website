@@ -14,8 +14,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { NewsArticle, NewsArticleData } from '@/lib/types';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -33,18 +33,8 @@ export default function NewsPage() {
   const handleDelete = (articleId: string) => {
     if (!firestore || !articleId) return;
     if (confirm('Are you sure you want to delete this article?')) {
-      deleteDoc(doc(firestore, 'news', articleId))
-        .then(() => {
-          toast({ title: 'Article Deleted', description: 'The article has been successfully removed.' });
-        })
-        .catch((error) => {
-          console.error('Error deleting document: ', error);
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'There was a problem deleting the article.',
-          });
-        });
+      deleteDocumentNonBlocking(doc(firestore, 'news', articleId));
+      toast({ title: 'Article Deleted', description: 'The article has been successfully removed.' });
     }
   };
 

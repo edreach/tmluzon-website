@@ -27,8 +27,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { BrandData } from '@/lib/types';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc, query, orderBy } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
@@ -46,14 +46,8 @@ export default function BrandsPage() {
     const handleDelete = (brandId: string) => {
         if (!firestore || !brandId) return;
         if (confirm('Are you sure you want to delete this brand?')) {
-            deleteDoc(doc(firestore, 'brands', brandId))
-                .then(() => {
-                    toast({ title: 'Brand Deleted', description: 'The brand has been successfully removed.' });
-                })
-                .catch((error) => {
-                    console.error("Error deleting document: ", error);
-                    toast({ variant: 'destructive', title: 'Error', description: 'There was a problem deleting the brand.' });
-                });
+            deleteDocumentNonBlocking(doc(firestore, 'brands', brandId));
+            toast({ title: 'Brand Deleted', description: 'The brand has been successfully removed.' });
         }
     };
 
