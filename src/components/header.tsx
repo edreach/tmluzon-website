@@ -35,16 +35,16 @@ export default function Header() {
   const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
-      <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-20 items-center">
+    <header className="sticky top-0 z-50 w-full bg-background/80 text-foreground backdrop-blur-sm">
+      <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-24 items-center">
         
         {/* LEFT: Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center space-x-2">
             {isLoadingSettings ? (
-                <Skeleton className="h-16 w-40" />
+                <Skeleton className="h-20 w-48" />
             ) : siteSettings?.logoUrl ? (
-                <div className="relative h-16 w-40">
+                <div className="relative h-20 w-48">
                     <Image
                         src={siteSettings.logoUrl}
                         alt="TM Luzon Logo"
@@ -113,9 +113,9 @@ export default function Header() {
                         <SheetTitle>
                             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                                 {isLoadingSettings ? (
-                                    <Skeleton className="h-16 w-40" />
+                                    <Skeleton className="h-20 w-48" />
                                 ) : siteSettings?.logoUrl ? (
-                                    <div className="relative h-16 w-40">
+                                    <div className="relative h-20 w-48">
                                         <Image
                                             src={siteSettings.logoUrl}
                                             alt="TM Luzon Logo"
