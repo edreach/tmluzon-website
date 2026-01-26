@@ -76,13 +76,14 @@ export type SiteSettings = {
     aboutUsContent?: AboutUsContent;
 }
 
-export type PricelistFile = {
-  id: string;
+export type PricelistData = {
   brand: string;
   title: string;
   fileName: string;
   fileUrl: string;
 };
+
+export type PricelistFile = PricelistData & { id: string };
 
 export type NewsArticle = {
   id: string;

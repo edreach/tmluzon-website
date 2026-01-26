@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PricelistForm from "../../../pricelist-form";
 import { notFound, useParams } from "next/navigation";
-import type { PricelistFile } from "@/lib/types";
+import type { PricelistData, PricelistFile } from "@/lib/types";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,7 @@ function EditPricelistPage() {
       () => (firestore && id) ? doc(firestore, 'pricelists', id) : null,
       [firestore, id]
   );
-  const { data: pricelist, isLoading } = useDoc<PricelistFile>(pricelistRef);
+  const { data: pricelist, isLoading } = useDoc<PricelistData>(pricelistRef);
   
   if (isLoading) {
     return (
@@ -46,6 +46,9 @@ function EditPricelistPage() {
   if (!pricelist && !isLoading) {
     notFound();
   }
+  
+  const pricelistWithId: PricelistFile | null = pricelist ? { ...pricelist.data, id: pricelist.id } : null;
+
 
   return (
     <>
@@ -54,11 +57,11 @@ function EditPricelistPage() {
       </div>
       <Card>
         <CardHeader>
-            <CardTitle>Edit: {pricelist?.title}</CardTitle>
+            <CardTitle>Edit: {pricelistWithId?.title}</CardTitle>
             <CardDescription>Update your pricelist details.</CardDescription>
         </CardHeader>
         <CardContent>
-            {pricelist && <PricelistForm pricelist={pricelist} />}
+            {pricelistWithId && <PricelistForm pricelist={pricelistWithId} />}
         </CardContent>
       </Card>
     </>
@@ -66,5 +69,3 @@ function EditPricelistPage() {
 }
 
 export default EditPricelistPage;
-
-    
