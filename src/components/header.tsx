@@ -7,6 +7,11 @@ import { Menu, ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
 import { useState } from "react";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import Image from "next/image";
+import type { SiteSettings } from "@/lib/types";
+import { Skeleton } from "./ui/skeleton";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -22,6 +27,13 @@ export default function Header() {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const firestore = useFirestore();
+  const settingsRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null),
+    [firestore]
+  );
+  const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 text-foreground backdrop-blur-sm">
       <div className="container mx-auto px-4 grid grid-cols-[1fr_auto_1fr] h-16 items-center">
@@ -29,7 +41,20 @@ export default function Header() {
         {/* LEFT: Logo */}
         <div className="flex items-center justify-start">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-lg">TM Luzon Logo</span>
+            {isLoadingSettings ? (
+                <Skeleton className="h-8 w-32" />
+            ) : siteSettings?.logoUrl ? (
+                <div className="relative h-10 w-32">
+                    <Image
+                        src={siteSettings.logoUrl}
+                        alt="TM Luzon Logo"
+                        fill
+                        className="object-contain"
+                    />
+                </div>
+            ) : (
+                <span className="font-bold text-lg">TM Luzon Logo</span>
+            )}
           </Link>
         </div>
         
@@ -87,7 +112,20 @@ export default function Header() {
                     <SheetHeader>
                         <SheetTitle>
                             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                                <span className="font-bold text-lg">TM Luzon</span>
+                                {isLoadingSettings ? (
+                                    <Skeleton className="h-8 w-32" />
+                                ) : siteSettings?.logoUrl ? (
+                                    <div className="relative h-10 w-32">
+                                        <Image
+                                            src={siteSettings.logoUrl}
+                                            alt="TM Luzon Logo"
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                ) : (
+                                    <span className="font-bold text-lg">TM Luzon</span>
+                                )}
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
