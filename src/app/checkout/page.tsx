@@ -16,6 +16,7 @@ import { collection } from "firebase/firestore";
 import { z } from "zod";
 import type { InquiryData } from "@/lib/types";
 import { Textarea } from "@/components/ui/textarea";
+import { sendInquiryEmail } from "@/ai/flows/send-inquiry-email";
 
 const InquiryFormSchema = z.object({
   customerEmail: z.string().email(),
@@ -84,6 +85,13 @@ export default function CheckoutPage() {
 
       try {
           addDocumentNonBlocking(collection(firestore, 'inquiries'), inquiryData);
+          
+          sendInquiryEmail(inquiryData).then(response => {
+            console.log('Email flow response:', response.message);
+          }).catch(error => {
+            console.error('Failed to send inquiry email:', error);
+          });
+
           toast({
               title: "Inquiry Submitted!",
               description: "Thank you for your inquiry. We will get back to you shortly.",
