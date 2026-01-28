@@ -142,14 +142,7 @@ export default function ServiceDetailPage() {
               <p>{service?.description}</p>
             </div>
              <div className="flex flex-col gap-4 mt-auto">
-                {serviceAsProduct && serviceAsProduct.price > 0 && (
-                    <AddToCartButton product={serviceAsProduct} />
-                )}
-                <Button size="lg" variant="outline" asChild>
-                <a href={`mailto:tmluzon.engineering@gmail.com?subject=Inquiry about ${service?.name}`}>
-                    Inquire About This Service
-                </a>
-                </Button>
+                {serviceAsProduct && <AddToCartButton product={serviceAsProduct} />}
             </div>
           </div>
         </div>
