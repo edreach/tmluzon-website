@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Minus, Plus, Trash2 } from "lucide-react";
 import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { z } from "zod";
@@ -25,7 +25,7 @@ const InquiryFormSchema = z.object({
 });
 
 export default function CheckoutPage() {
-  const { inquiry, clearInquiry } = useInquiry();
+  const { inquiry, clearInquiry, updateQuantity, removeFromInquiry } = useInquiry();
   const router = useRouter();
   const { toast } = useToast();
   const firestore = useFirestore();
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (inquiry.length === 0 && !isProcessing) {
-      router.push('/');
+      router.push('/products');
     }
   }, [inquiry, router, isProcessing]);
 
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
       }
   };
 
-  if (inquiry.length === 0) {
+  if (inquiry.length === 0 && !isProcessing) {
     return null;
   }
 
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
               <Label htmlFor="message">Message (Optional)</Label>
               <Textarea id="message" name="message" placeholder="Include any special requests or questions here..." />
             </div>
-            <Button type="submit" disabled={isProcessing} className="w-full" size="lg">
+            <Button type="submit" disabled={isProcessing || inquiry.length === 0} className="w-full" size="lg">
               {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : "Submit Inquiry"}
             </Button>
           </form>
@@ -145,20 +145,42 @@ export default function CheckoutPage() {
           <CardContent>
             <div className="space-y-4">
               {inquiry.map(item => (
-                <div key={item.product.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {item.product.imageUrls && item.product.imageUrls.length > 0 ? (
-                        <Image src={item.product.imageUrls[0]} alt={item.product.name} width={64} height={64} className="rounded-md" />
-                    ) : (
-                        <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">No Image</div>
-                    )}
-                    <div>
-                      <p className="font-medium">{item.product.name}</p>
-                      <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                <div key={item.product.id} className="flex items-center gap-4">
+                  {item.product.imageUrls && item.product.imageUrls.length > 0 ? (
+                      <Image src={item.product.imageUrls[0]} alt={item.product.name} width={64} height={64} className="rounded-md object-cover" />
+                  ) : (
+                      <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">No Image</div>
+                  )}
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{item.product.name}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                        <Button
+                            variant="outline" size="icon" className="h-6 w-6"
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        >
+                            <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-6 text-center text-sm">{item.quantity}</span>
+                        <Button
+                            variant="outline" size="icon" className="h-6 w-6"
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        >
+                            <Plus className="h-3 w-3" />
+                        </Button>
                     </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeFromInquiry(item.product.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
+               {inquiry.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">Your inquiry list is empty.</p>
+              )}
             </div>
           </CardContent>
         </Card>
