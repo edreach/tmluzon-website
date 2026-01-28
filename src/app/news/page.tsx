@@ -7,6 +7,7 @@ import { collection, orderBy, query } from 'firebase/firestore';
 import type { NewsArticle, NewsArticleData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 export default function NewsPage() {
   const firestore = useFirestore();
@@ -44,26 +45,30 @@ export default function NewsPage() {
           )}
 
           {!isLoading && newsItems?.map((item) => (
-            <Card key={item.id} className="overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
-              {item.imageUrl && (
+            <Link href={`/news/${item.id}`} key={item.id} className="block">
+              <Card className="overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
                 <div className="relative w-full h-48 bg-muted">
-                    <Image
-                    src={item.imageUrl}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={item.imageHint}
-                    />
+                  {item.imageUrls && item.imageUrls.length > 0 ? (
+                      <Image
+                      src={item.imageUrls[0]}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      data-ai-hint={item.imageHint}
+                      />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                  )}
                 </div>
-              )}
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-lg font-bold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {format(new Date(item.date), 'MMMM d, yyyy')}
-                </p>
-                <div className="text-sm text-muted-foreground mt-4 flex-grow whitespace-pre-wrap">{item.content}</div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-lg font-bold">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {format(new Date(item.date), 'MMMM d, yyyy')}
+                  </p>
+                  <div className="text-sm text-muted-foreground mt-4 flex-grow whitespace-pre-wrap line-clamp-3">{item.content}</div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
 
           {!isLoading && newsItems?.length === 0 && (

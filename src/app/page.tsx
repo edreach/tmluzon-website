@@ -235,8 +235,8 @@ export default function Home() {
                 </>
                 )}
                 {!isLoading && latestNews && (
-                <Link href="/news" className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
-                    <Image src={latestNews.imageUrl || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
+                <Link href={`/news/${latestNews.id}`} className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
+                    <Image src={latestNews.imageUrls?.[0] || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
                         <h2 className="text-3xl md:text-4xl font-bold">{latestNews.title}</h2>
@@ -255,8 +255,8 @@ export default function Home() {
                 {/* Right Column */}
                 <div className="flex flex-col gap-8">
                     {!isLoading && secondNews && (
-                    <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
-                        <Image src={secondNews.imageUrl || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
+                    <Link href={`/news/${secondNews.id}`} className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                        <Image src={secondNews.imageUrls?.[0] || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
                         <div className="absolute inset-0 bg-black/40" />
                         <div className="relative h-full flex items-end p-6 text-white">
                             <h3 className="text-2xl font-bold">{secondNews.title}</h3>
@@ -264,8 +264,8 @@ export default function Home() {
                     </Link>
                     )}
                     {!isLoading && thirdNews && (
-                    <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
-                        <Image src={thirdNews.imageUrl || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
+                    <Link href={`/news/${thirdNews.id}`} className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                        <Image src={thirdNews.imageUrls?.[0] || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
                         <div className="absolute inset-0 bg-black/40" />
                         <div className="relative h-full flex items-end p-6 text-white">
                             <h3 className="text-2xl font-bold">{thirdNews.title}</h3>

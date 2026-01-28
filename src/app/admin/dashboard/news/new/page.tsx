@@ -9,7 +9,7 @@ export default function NewArticlePage() {
     title: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     content: '',
-    imageUrl: '',
+    imageUrls: [],
     imageHint: '',
   };
 

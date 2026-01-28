@@ -95,7 +95,7 @@ export type NewsArticleData = {
   title: string;
   date: string;
   content: string;
-  imageUrl?: string;
+  imageUrls?: string[];
   imageHint?: string;
 };
 export type NewsArticle = NewsArticleData & { id: string };
