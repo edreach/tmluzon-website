@@ -13,6 +13,7 @@ import {
   Settings,
   Tag,
   Loader2,
+  Bell,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useFirebase } from '@/firebase';
@@ -176,6 +177,13 @@ export default function DashboardLayout({
               >
                 <Mail className="h-4 w-4" />
                 Inquiries
+              </Link>
+               <Link
+                href="/admin/dashboard/notifications"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              >
+                <Bell className="h-4 w-4" />
+                Notifications
               </Link>
               <Link
                 href="/admin/dashboard/settings"

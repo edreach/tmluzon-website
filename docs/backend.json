@@ -180,22 +180,76 @@
           "description": "URL of the site logo.",
           "format": "uri"
         },
+        "notificationSettings": {
+          "type": "object",
+          "description": "Settings for email notifications regarding inquiries.",
+          "properties": {
+            "recipients": {
+              "type": "array",
+              "description": "A list of email addresses that will receive inquiry notifications. One email per line.",
+              "items": {
+                "type": "string",
+                "format": "email"
+              }
+            },
+            "smtpHost": {
+              "type": "string",
+              "description": "SMTP server host."
+            },
+            "smtpPort": {
+              "type": "number",
+              "description": "SMTP server port."
+            },
+            "smtpUser": {
+              "type": "string",
+              "description": "Username for SMTP authentication."
+            },
+            "smtpPass": {
+              "type": "string",
+              "description": "Password for SMTP authentication."
+            }
+          }
+        },
         "aboutUsContent": {
           "type": "object",
           "description": "Structured content for the About Us page.",
           "properties": {
-            "intro_p1": { "type": "string" },
-            "intro_p2": { "type": "string" },
-            "intro_p3": { "type": "string" },
-            "overview_p1": { "type": "string" },
-            "service_consultation": { "type": "string" },
-            "service_supply": { "type": "string" },
-            "service_supply_list": { "type": "string" },
-            "service_installation": { "type": "string" },
-            "service_maintenance": { "type": "string" },
-            "statement_purpose": { "type": "string" },
-            "statement_vision": { "type": "string" },
-            "statement_mission": { "type": "string" }
+            "intro_p1": {
+              "type": "string"
+            },
+            "intro_p2": {
+              "type": "string"
+            },
+            "intro_p3": {
+              "type": "string"
+            },
+            "overview_p1": {
+              "type": "string"
+            },
+            "service_consultation": {
+              "type": "string"
+            },
+            "service_supply": {
+              "type": "string"
+            },
+            "service_supply_list": {
+              "type": "string"
+            },
+            "service_installation": {
+              "type": "string"
+            },
+            "service_maintenance": {
+              "type": "string"
+            },
+            "statement_purpose": {
+              "type": "string"
+            },
+            "statement_vision": {
+              "type": "string"
+            },
+            "statement_mission": {
+              "type": "string"
+            }
           }
         }
       },
@@ -242,14 +296,32 @@
       "type": "object",
       "description": "Represents a brand partner, featured on the About Us page.",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "logoUrl": { "type": "string", "format": "uri" },
-        "websiteUrl": { "type": "string", "format": "uri" },
-        "imageHint": { "type": "string" },
-        "sortOrder": { "type": "number", "description": "A number to control the display order on the public site. Lower numbers appear first." }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "logoUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "websiteUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "imageHint": {
+          "type": "string"
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "A number to control the display order on the public site. Lower numbers appear first."
+        }
       },
-      "required": ["name", "logoUrl"]
+      "required": [
+        "name",
+        "logoUrl"
+      ]
     },
     "NewsArticle": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -257,13 +329,29 @@
       "type": "object",
       "description": "Represents a news article or update.",
       "properties": {
-        "title": { "type": "string" },
-        "date": { "type": "string", "format": "date" },
-        "imageUrl": { "type": "string", "format": "uri" },
-        "imageHint": { "type": "string" },
-        "content": { "type": "string" }
+        "title": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "imageHint": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
       },
-      "required": ["title", "date", "content"]
+      "required": [
+        "title",
+        "date",
+        "content"
+      ]
     },
     "Inquiry": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -271,25 +359,52 @@
       "type": "object",
       "description": "Represents a customer inquiry or order from the public website.",
       "properties": {
-        "customerName": { "type": "string" },
-        "customerEmail": { "type": "string", "format": "email" },
-        "customerContact": { "type": "string" },
-        "message": { "type": "string", "description": "Optional message from the customer." },
-        "inquiryDate": { "type": "string", "format": "date-time" },
+        "customerName": {
+          "type": "string"
+        },
+        "customerEmail": {
+          "type": "string",
+          "format": "email"
+        },
+        "customerContact": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "description": "Optional message from the customer."
+        },
+        "inquiryDate": {
+          "type": "string",
+          "format": "date-time"
+        },
         "status": {
           "type": "string",
-          "enum": ["New", "Viewed", "Completed"]
+          "enum": [
+            "New",
+            "Viewed",
+            "Completed"
+          ]
         },
         "items": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "productId": { "type": "string" },
-              "productName": { "type": "string" },
-              "quantity": { "type": "number" }
+              "productId": {
+                "type": "string"
+              },
+              "productName": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "number"
+              }
             },
-            "required": ["productId", "productName", "quantity"]
+            "required": [
+              "productId",
+              "productName",
+              "quantity"
+            ]
           }
         }
       },

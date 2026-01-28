@@ -6,7 +6,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import * as nodemailer from 'nodemailer';
-import type { InquiryData } from '@/lib/types';
+import type { InquiryData, SiteSettings } from '@/lib/types';
+import { adminDb } from '@/firebase/server';
+
 
 // Define the input schema for the flow, which is the inquiry data.
 const SendInquiryEmailInputSchema = z.custom<InquiryData>();
@@ -33,6 +35,33 @@ const sendInquiryEmailFlow = ai.defineFlow(
     outputSchema: SendInquiryEmailOutputSchema,
   },
   async inquiry => {
+    // 1. Fetch notification settings from Firestore
+    const settingsDocRef = adminDb.doc('admin/dashboard/settings/tmluzon');
+    let notifySettings;
+    try {
+        const settingsDoc = await settingsDocRef.get();
+        if (!settingsDoc.exists) {
+            console.error('Site settings document not found. Cannot send inquiry email.');
+            return { message: 'Site settings not configured.' };
+        }
+        const settings = settingsDoc.data() as SiteSettings;
+        notifySettings = settings.notificationSettings;
+    } catch (error) {
+        console.error("Error fetching site settings:", error);
+        return { message: 'Could not fetch notification settings.' };
+    }
+    
+    // 2. Validate settings
+    if (!notifySettings || !notifySettings.recipients || notifySettings.recipients.length === 0) {
+        console.log('No notification recipients configured in Firestore. Skipping email.');
+        return { message: 'No recipients configured.' };
+    }
+    
+    if (!notifySettings.smtpHost || !notifySettings.smtpPort || !notifySettings.smtpUser || !notifySettings.smtpPass) {
+        console.error("SMTP configuration is missing in site settings. Cannot send email.");
+        return { message: 'SMTP not configured in settings.' };
+    }
+
     const { 
         customerName, 
         customerEmail, 
@@ -41,28 +70,14 @@ const sendInquiryEmailFlow = ai.defineFlow(
         items 
     } = inquiry;
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-
-    if (!adminEmail) {
-      console.error('ADMIN_EMAIL environment variable is not set. Cannot send inquiry email.');
-      // Silently fail in production, but log error.
-      return { message: 'Admin email not configured.' };
-    }
-
-    if (!process.env.SMTP_HOST) {
-        console.error("SMTP configuration is missing. Cannot send email.");
-        return { message: 'SMTP not configured.' };
-    }
-    
-    // Create a transporter object using SMTP transport.
-    // The user will need to configure these environment variables.
+    // 3. Create Nodemailer transporter
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
+      host: notifySettings.smtpHost,
+      port: Number(notifySettings.smtpPort),
+      secure: Number(notifySettings.smtpPort) === 465, // true for 465, false for other ports
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: notifySettings.smtpUser,
+        pass: notifySettings.smtpPass,
       },
     });
 
@@ -73,10 +88,10 @@ const sendInquiryEmailFlow = ai.defineFlow(
       </tr>
     `).join('');
 
-    // Email content
+    // 4. Define Email content
     const mailOptions = {
-      from: `"TMLUZON Website" <${process.env.SMTP_USER}>`,
-      to: adminEmail,
+      from: `"TMLUZON Website" <${notifySettings.smtpUser}>`,
+      to: notifySettings.recipients.join(','),
       subject: 'New Customer Inquiry Received',
       html: `
         <div style="font-family: sans-serif; line-height: 1.6;">
@@ -111,6 +126,7 @@ const sendInquiryEmailFlow = ai.defineFlow(
       `,
     };
 
+    // 5. Send email
     try {
       await transporter.sendMail(mailOptions);
       return { message: 'Email sent successfully.' };

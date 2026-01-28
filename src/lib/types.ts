@@ -70,9 +70,18 @@ export type AboutUsContent = {
   statement_mission: string;
 };
 
+export type NotificationSettings = {
+  recipients?: string[];
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPass?: string;
+};
+
 export type SiteSettings = {
     logoUrl?: string;
     aboutUsContent?: AboutUsContent;
+    notificationSettings?: NotificationSettings;
 }
 
 export type PricelistData = {
