@@ -119,8 +119,10 @@ export default function ServiceDetailPage() {
             <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap">
               <p>{service?.description}</p>
             </div>
-            <Button size="lg" className="mt-8">
-              Inquire About This Service
+            <Button size="lg" className="mt-8" asChild>
+              <a href={`mailto:tmluzon.engineering@gmail.com?subject=Inquiry about ${service?.name}`}>
+                Inquire About This Service
+              </a>
             </Button>
           </div>
         </div>
