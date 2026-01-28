@@ -20,7 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, UserPlus, Shield, ShieldOff, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,35 +28,22 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser, useStorage, useAuth } from "@/firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser, useStorage } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import type { UserProfile, AdminRole, SiteSettings } from "@/lib/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
 
 export default function SettingsPage() {
     const firestore = useFirestore();
     const storage = useStorage();
-    const auth = useAuth();
     const { toast } = useToast();
     const { user: currentUser, isUserLoading: isAuthLoading } = useUser();
-    const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
-    const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
 
     // Logo state
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -84,58 +71,6 @@ export default function SettingsPage() {
         const adminIds = new Set(adminRoles.map(role => role.id));
         return users.filter(user => user.uid && adminIds.has(user.uid));
     }, [users, adminRoles]);
-    
-    const handleAddUser = async () => {
-        if (!newUser.name || !newUser.email || !newUser.password) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please enter name, email, and password.' });
-            return;
-        }
-
-        if (newUser.password.length < 6) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Password must be at least 6 characters.' });
-            return;
-        }
-        
-        if (!firestore || !auth) return;
-
-        try {
-            // This will sign in the new user and sign out the current admin.
-            const userCredential = await createUserWithEmailAndPassword(auth, newUser.email, newUser.password);
-            const authUser = userCredential.user;
-            
-            // Create the user profile in Firestore using the UID from Auth as the document ID.
-            const userDocRef = doc(firestore, "users", authUser.uid);
-            await setDoc(userDocRef, { 
-                uid: authUser.uid,
-                name: newUser.name, 
-                email: newUser.email 
-            });
-
-            // Also add them to the admin roles
-            const adminRoleRef = doc(firestore, 'roles_admin', authUser.uid);
-            await setDoc(adminRoleRef, { uid: authUser.uid });
-
-            toast({ title: 'Administrator Created', description: `${newUser.name} has been created.` });
-            setNewUser({ name: '', email: '', password: '' });
-            setAddUserDialogOpen(false);
-
-            // Inform the admin that they've been signed out.
-            toast({
-                title: "You have been signed out.",
-                description: "Please log back in with your admin credentials to continue.",
-                duration: 9000,
-                variant: 'destructive',
-            });
-
-        } catch (error: any) {
-            console.error("Error creating user:", error);
-            toast({ 
-                variant: 'destructive', 
-                title: 'User Creation Failed', 
-                description: error.message || 'An unknown error occurred.' 
-            });
-        }
-    };
     
     const handleDeleteUser = (userToDelete: UserProfile & { id: string }) => {
         if (currentUser?.uid === userToDelete.uid) {
@@ -244,47 +179,10 @@ export default function SettingsPage() {
                 
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle>Administrator Management</CardTitle>
-                                <CardDescription>
-                                    Manage administrator accounts for the dashboard.
-                                </CardDescription>
-                            </div>
-                            <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
-                                <DialogTrigger asChild>
-                                     <Button>
-                                        <UserPlus className="mr-2 h-4 w-4" />
-                                        Add Administrator
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Add New Administrator</DialogTitle>
-                                        <DialogDescription>
-                                            Enter the new administrator's details. This will create their account and sign you out. You will need to log back in.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="grid gap-4 py-4">
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="name" className="text-right">Name</Label>
-                                            <Input id="name" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value })} className="col-span-3" />
-                                        </div>
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="email" className="text-right">Email</Label>
-                                            <Input id="email" type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value })} className="col-span-3" />
-                                        </div>
-                                        <div className="grid grid-cols-4 items-center gap-4">
-                                            <Label htmlFor="password" className="text-right">Password</Label>
-                                            <Input id="password" type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value })} className="col-span-3" />
-                                        </div>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button onClick={handleAddUser}>Save Administrator</Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
+                        <CardTitle>Administrator Management</CardTitle>
+                        <CardDescription>
+                            Administrators are managed via their Google accounts. To add a new admin, have them sign in to the dashboard once. Then, their account will appear here.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -327,7 +225,7 @@ export default function SettingsPage() {
                                 ))}
                                 {!isLoading && !adminUsers?.length && (
                                     <TableRow>
-                                        <TableCell colSpan={3} className="text-center">No administrators found. Click "Add Administrator" to start.</TableCell>
+                                        <TableCell colSpan={3} className="text-center">No administrators found.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>

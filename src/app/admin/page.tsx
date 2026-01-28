@@ -3,12 +3,10 @@
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -22,8 +20,6 @@ export default function AdminLoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Fetch site settings for logo
@@ -43,28 +39,6 @@ export default function AdminLoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!auth) return;
-
-    setIsLoggingIn(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Successful login will trigger the useEffect to redirect
-      router.push('/admin/dashboard');
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: error.code === 'auth/invalid-credential' 
-            ? 'Incorrect email or password.'
-            : error.message || 'An unknown error occurred.',
-      });
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-  
   const handleGoogleLogin = async () => {
     if (!auth) return;
     setIsLoggingIn(true);
@@ -115,48 +89,9 @@ export default function AdminLoginPage() {
               </div>
             </Link>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
+          <CardDescription>Sign in with your Google account to access the dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="admin@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoggingIn}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoggingIn}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoggingIn}>
-              {isLoggingIn && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-          </form>
-          <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                  </span>
-              </div>
-          </div>
           <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoggingIn}>
                {isLoggingIn ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (
                   <svg role="img" viewBox="0 0 24 24" className="mr-2 h-4 w-4">
@@ -166,7 +101,7 @@ export default function AdminLoginPage() {
                       />
                   </svg>
                )}
-              Google
+              Sign in with Google
           </Button>
         </CardContent>
       </Card>

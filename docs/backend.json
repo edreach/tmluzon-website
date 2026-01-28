@@ -355,8 +355,7 @@
   },
   "auth": {
     "providers": [
-      "google.com",
-      "password"
+      "google.com"
     ]
   },
   "firestore": {
