@@ -10,13 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LayoutGrid, List } from 'lucide-react';
 import type { Product, ProductData } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductsPage() {
@@ -32,16 +31,6 @@ export default function ProductsPage() {
   const [products, setProducts] = React.useState<Product[]>([]);
   const [view, setView] = React.useState('grid');
   
-  const maxPrice = React.useMemo(() => {
-      if (!allProducts || allProducts.length === 0) return 100000;
-      return Math.max(...allProducts.map(p => p.price), 100000);
-  }, [allProducts]);
-  const [priceRange, setPriceRange] = React.useState([0, maxPrice]);
-
-  React.useEffect(() => {
-    setPriceRange([0, maxPrice]);
-  }, [maxPrice]);
-
   // Get unique values for filters
   const brands = React.useMemo(() => ['All Brands', ...Array.from(new Set((allProducts || []).map((p) => p.brand)))], [allProducts]);
   const types = React.useMemo(() => ['All Types', ...Array.from(new Set((allProducts || []).map((p) => p.type)))], [allProducts]);
@@ -51,7 +40,7 @@ export default function ProductsPage() {
   const [brand, setBrand] = React.useState('All Brands');
   const [type, setType] = React.useState('All Types');
   const [subType, setSubType] = React.useState('All Sub-Types');
-  const [sortBy, setSortBy] = React.useState('popularity');
+  const [sortBy, setSortBy] = React.useState('name-asc');
 
   React.useEffect(() => {
     let filtered = (allProducts as Product[]) || [];
@@ -66,22 +55,19 @@ export default function ProductsPage() {
       filtered = filtered.filter((p) => p.subType === subType);
     }
     
-    filtered = filtered.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
     // Sorting logic
     const sorted = [...filtered].sort((a, b) => {
-        if (sortBy === 'price-asc') {
-            return a.price - b.price;
+        if (sortBy === 'name-asc') {
+            return a.name.localeCompare(b.name);
         }
-        if (sortBy === 'price-desc') {
-            return b.price - a.price;
+        if (sortBy === 'name-desc') {
+            return b.name.localeCompare(a.name);
         }
-        // "popularity" is default, no specific sorting for now
         return 0;
     });
 
     setProducts(sorted);
-  }, [brand, type, subType, priceRange, sortBy, allProducts]);
+  }, [brand, type, subType, sortBy, allProducts]);
   
   const itemsPerPage = 16;
   const totalResults = products.length;
@@ -136,22 +122,6 @@ export default function ProductsPage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Filter by price</label>
-                <Slider
-                  min={0}
-                  max={maxPrice}
-                  step={1000}
-                  value={priceRange}
-                  onValueChange={(value) => setPriceRange(value as [number, number])}
-                  className="mt-4"
-                />
-                <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                  <span>₱{priceRange[0].toLocaleString('en-US')}</span>
-                  <span>₱{priceRange[1].toLocaleString('en-US')}</span>
-                </div>
-              </div>
             </div>
           </aside>
 
@@ -183,12 +153,11 @@ export default function ProductsPage() {
                 </div>
                  <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by popularity" />
+                    <SelectValue placeholder="Sort by name" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="popularity">Sort by popularity</SelectItem>
-                    <SelectItem value="price-asc">Sort by price: low to high</SelectItem>
-                    <SelectItem value="price-desc">Sort by price: high to low</SelectItem>
+                    <SelectItem value="name-asc">Sort by name: A-Z</SelectItem>
+                    <SelectItem value="name-desc">Sort by name: Z-A</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

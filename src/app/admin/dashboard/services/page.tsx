@@ -78,7 +78,6 @@ export default function ServicesPage() {
                             <TableRow>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Description</TableHead>
-                                <TableHead className="text-right">Price</TableHead>
                                 <TableHead>
                                     <span className="sr-only">Actions</span>
                                 </TableHead>
@@ -90,7 +89,6 @@ export default function ServicesPage() {
                                     <TableRow key={i}>
                                         <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                                         <TableCell><Skeleton className="h-5 w-full" /></TableCell>
-                                        <TableCell><Skeleton className="h-5 w-24 ml-auto" /></TableCell>
                                         <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                                     </TableRow>
                                 ))
@@ -99,12 +97,6 @@ export default function ServicesPage() {
                                 <TableRow key={service.id}>
                                     <TableCell className="font-medium">{service.name}</TableCell>
                                     <TableCell>{service.description.substring(0, 100)}...</TableCell>
-                                     <TableCell className="text-right">
-                                        {service.showPrice !== false
-                                            ? `₱${service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                            : <span className="text-muted-foreground">Hidden</span>
-                                        }
-                                    </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -127,7 +119,7 @@ export default function ServicesPage() {
                             ))}
                              {!isLoading && services?.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">No services found.</TableCell>
+                                    <TableCell colSpan={3} className="text-center h-24">No services found.</TableCell>
                                 </TableRow>
                              )}
                         </TableBody>

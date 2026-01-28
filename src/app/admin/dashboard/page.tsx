@@ -78,7 +78,6 @@ export default function Dashboard() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Brand</TableHead>
                                 <TableHead>Type</TableHead>
-                                <TableHead className="text-right">Price</TableHead>
                                 <TableHead>
                                     <span className="sr-only">Actions</span>
                                 </TableHead>
@@ -91,7 +90,6 @@ export default function Dashboard() {
                                         <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                                         <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                                         <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
                                         <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                                     </TableRow>
                                 ))
@@ -103,12 +101,6 @@ export default function Dashboard() {
                                         <Badge variant="secondary">{product.brand}</Badge>
                                     </TableCell>
                                     <TableCell>{product.type}</TableCell>
-                                    <TableCell className="text-right">
-                                        {product.showPrice !== false
-                                            ? `₱${product.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                            : <span className="text-muted-foreground">Hidden</span>
-                                        }
-                                    </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -131,7 +123,7 @@ export default function Dashboard() {
                             ))}
                              {!isLoading && products?.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24">No products found.</TableCell>
+                                    <TableCell colSpan={4} className="text-center h-24">No products found.</TableCell>
                                 </TableRow>
                              )}
                         </TableBody>

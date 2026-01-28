@@ -42,7 +42,6 @@ interface ProductFormProps {
 
 const ProductFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
-  price: z.coerce.number().positive("Price must be a positive number."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   type: z.string().min(2, "Type must be at least 2 characters."),
   brand: z.string().min(2, "Brand must be at least 2 characters."),
@@ -50,7 +49,6 @@ const ProductFormSchema = z.object({
   imageUrls: z.array(z.string().url()).min(1, "At least one image is required."),
   specifications: z.array(z.object({ name: z.string(), value: z.string()})).optional(),
   discontinued: z.boolean().default(false),
-  showPrice: z.boolean().default(true),
   stockStatus: z.enum(['In Stock', 'Out of Stock', 'Made to Order']).optional(),
 });
 
@@ -171,7 +169,6 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
     const productToSave = {
         ...product,
         imageUrls: finalImageUrls,
-        price: Number(product.price) || 0,
     };
 
     const parsed = ProductFormSchema.safeParse(productToSave);
@@ -209,10 +206,6 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
         <div className="space-y-2">
             <Label htmlFor="name">Product Name</Label>
             <Input id="name" name="name" value={product.name} onChange={handleInputChange} />
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} />
         </div>
         <div className="space-y-2">
             <Label htmlFor="brand">Brand</Label>
@@ -256,21 +249,6 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Discontinue this product (it will not be shown on the public site)
-            </label>
-          </div>
-           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="showPrice"
-              checked={product.showPrice !== false}
-              onCheckedChange={(checked) => {
-                setProduct(prev => ({...prev, showPrice: checked === true}));
-              }}
-            />
-            <label
-              htmlFor="showPrice"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Show price on the public site
             </label>
           </div>
         </div>

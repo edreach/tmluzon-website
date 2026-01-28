@@ -33,12 +33,6 @@ export default function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const subtotal = inquiry.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
-    0
-  );
-  const total = subtotal; // No shipping for inquiries
-
   useEffect(() => {
     if (inquiry.length === 0 && !isProcessing) {
       router.push('/');
@@ -87,13 +81,13 @@ export default function CheckoutPage() {
             zip: parsed.data.zip,
           },
           inquiryDate: new Date().toISOString(),
-          totalAmount: total,
+          totalAmount: 0,
           status: 'New',
           items: inquiry.map(item => ({
               productId: item.product.id,
               productName: item.product.name,
               quantity: item.quantity,
-              price: item.product.price,
+              price: 0,
           })),
       };
 
@@ -182,15 +176,8 @@ export default function CheckoutPage() {
                       <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="font-medium">₱{(item.product.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
               ))}
-            </div>
-            <div className="mt-6 border-t pt-4 space-y-2">
-              <div className="flex justify-between font-bold text-lg">
-                <p>Estimated Total</p>
-                <p>₱{total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-              </div>
             </div>
           </CardContent>
         </Card>

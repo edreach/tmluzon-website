@@ -17,7 +17,6 @@ import { collection, doc } from "firebase/firestore";
 import { z } from "zod";
 import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface ServiceFormProps {
   service: Service;
@@ -27,8 +26,6 @@ const ServiceFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   imageUrls: z.array(z.string().url()).optional(),
-  price: z.coerce.number().min(0, "Price must be a non-negative number."),
-  showPrice: z.boolean().default(true),
 });
 
 export default function ServiceForm({ service: initialService }: ServiceFormProps) {
@@ -146,7 +143,6 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
     const serviceToSave = {
       ...service,
       imageUrls: finalImageUrls,
-      price: Number(service.price) || 0,
     };
 
     const { id, ...serviceDataToValidate } = serviceToSave;
@@ -183,30 +179,9 @@ export default function ServiceForm({ service: initialService }: ServiceFormProp
   return (
     <form onSubmit={handleSave} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
             <Label htmlFor="name">Service Name</Label>
             <Input id="name" name="name" value={service.name} onChange={handleInputChange} />
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
-            <Input id="price" name="price" type="number" value={service.price} onChange={handleInputChange} />
-        </div>
-      </div>
-       <div className="space-y-2">
-        <div className="flex items-center space-x-2">
-            <Checkbox
-                id="showPrice"
-                checked={service.showPrice !== false}
-                onCheckedChange={(checked) => {
-                setService(prev => ({...prev, showPrice: checked === true}));
-                }}
-            />
-            <label
-                htmlFor="showPrice"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-                Show price on the public site
-            </label>
         </div>
       </div>
 

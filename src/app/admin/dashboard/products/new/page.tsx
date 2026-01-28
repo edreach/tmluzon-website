@@ -6,7 +6,6 @@ export default function NewProductPage() {
   const newProduct: Product = {
       id: 'new',
       name: '',
-      price: 0,
       description: '',
       type: '',
       brand: '',
@@ -15,7 +14,6 @@ export default function NewProductPage() {
       specifications: [],
       discontinued: false,
       stockStatus: 'In Stock',
-      showPrice: true,
   }
 
   return (

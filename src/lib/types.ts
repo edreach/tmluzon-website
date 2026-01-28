@@ -12,7 +12,6 @@ export type Specification = {
 
 export type ProductData = {
   name: string;
-  price: number;
   description: string;
   imageUrls: string[];
   specifications: Specification[];
@@ -21,7 +20,6 @@ export type ProductData = {
   subType: string;
   discontinued?: boolean;
   stockStatus?: 'In Stock' | 'Out of Stock' | 'Made to Order';
-  showPrice?: boolean;
 };
 export type Product = ProductData & { id: string };
 
@@ -44,8 +42,6 @@ export type ServiceData = {
   name: string;
   description: string;
   imageUrls: string[];
-  price: number;
-  showPrice?: boolean;
 };
 export type Service = ServiceData & { id: string };
 
