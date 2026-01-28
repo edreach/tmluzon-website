@@ -22,14 +22,20 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import type { Inquiry } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 export default function InquiriesPage() {
     const firestore = useFirestore();
+    const router = useRouter();
     const inquiriesQuery = useMemoFirebase(
         () => (firestore ? query(collection(firestore, 'inquiries'), orderBy('inquiryDate', 'desc')) : null),
         [firestore]
     );
     const { data: inquiries, isLoading } = useCollection<Inquiry>(inquiriesQuery);
+
+    const handleRowClick = (inquiryId: string) => {
+        router.push(`/admin/dashboard/inquiries/${inquiryId}`);
+    };
 
     return (
         <>
@@ -40,7 +46,7 @@ export default function InquiriesPage() {
                 <CardHeader>
                     <CardTitle>Customer Inquiries</CardTitle>
                     <CardDescription>
-                        List of received orders from customers.
+                        List of received orders from customers. Click a row to view details.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -65,7 +71,11 @@ export default function InquiriesPage() {
                                 </TableRow>
                             ))}
                             {!isLoading && inquiries?.map((inquiry) => (
-                                <TableRow key={inquiry.id}>
+                                <TableRow 
+                                    key={inquiry.id} 
+                                    className="cursor-pointer"
+                                    onClick={() => handleRowClick(inquiry.id)}
+                                >
                                     <TableCell>
                                         <div className="font-medium">{inquiry.customerName}</div>
                                         <div className="text-sm text-muted-foreground">{inquiry.customerEmail}</div>
