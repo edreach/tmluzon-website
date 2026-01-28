@@ -135,8 +135,8 @@ export default function ServiceDetailPage() {
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-2">{service?.name}</h1>
-            {service?.showPrice !== false && (
-                <p className="text-2xl font-semibold text-primary mb-4">₱{service?.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            {service && service.showPrice !== false && typeof service.price === 'number' && (
+                <p className="text-2xl font-semibold text-primary mb-4">₱{service.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             )}
             <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap mb-6">
               <p>{service?.description}</p>
