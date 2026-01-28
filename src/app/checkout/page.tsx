@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/contexts/cart-context";
+import { useInquiry } from "@/contexts/cart-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import { collection } from "firebase/firestore";
 import { z } from "zod";
 import type { InquiryData } from "@/lib/types";
 
-const OrderSchema = z.object({
+const InquiryFormSchema = z.object({
   customerEmail: z.string().email(),
   customerName: z.string().min(2, { message: "Name must be at least 2 characters." }),
   address: z.string().min(5, { message: "Address is required." }),
@@ -26,27 +26,26 @@ const OrderSchema = z.object({
 });
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useCart();
+  const { inquiry, clearInquiry } = useInquiry();
   const router = useRouter();
   const { toast } = useToast();
   const firestore = useFirestore();
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const subtotal = cart.reduce(
+  const subtotal = inquiry.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
     0
   );
-  const shipping = 5.0;
-  const total = subtotal + shipping;
+  const total = subtotal; // No shipping for inquiries
 
   useEffect(() => {
-    if (cart.length === 0 && !isProcessing) {
+    if (inquiry.length === 0 && !isProcessing) {
       router.push('/');
     }
-  }, [cart, router, isProcessing]);
+  }, [inquiry, router, isProcessing]);
 
-  const handleProcessOrder = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleProcessInquiry = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setIsProcessing(true);
 
@@ -66,7 +65,7 @@ export default function CheckoutPage() {
           zip: formData.get("zip") as string,
       };
 
-      const parsed = OrderSchema.safeParse(data);
+      const parsed = InquiryFormSchema.safeParse(data);
 
       if (!parsed.success) {
           toast({
@@ -90,7 +89,7 @@ export default function CheckoutPage() {
           inquiryDate: new Date().toISOString(),
           totalAmount: total,
           status: 'New',
-          items: cart.map(item => ({
+          items: inquiry.map(item => ({
               productId: item.product.id,
               productName: item.product.name,
               quantity: item.quantity,
@@ -101,38 +100,38 @@ export default function CheckoutPage() {
       try {
           addDocumentNonBlocking(collection(firestore, 'inquiries'), inquiryData);
           toast({
-              title: "Order Placed!",
-              description: "Thank you for your purchase. We've received your order.",
+              title: "Inquiry Submitted!",
+              description: "Thank you for your inquiry. We will get back to you shortly.",
           });
-          clearCart();
+          clearInquiry();
           router.push("/");
       } catch (error: any) {
           toast({
               title: "Error",
-              description: error.message || "Failed to place order.",
+              description: error.message || "Failed to submit inquiry.",
               variant: "destructive",
           });
           setIsProcessing(false);
       }
   };
 
-  if (cart.length === 0) {
+  if (inquiry.length === 0) {
     return null;
   }
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 md:py-12">
       <Button variant="ghost" asChild className="mb-4">
-        <Link href="/">
+        <Link href="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Shop
+            Back to Products
         </Link>
       </Button>
-      <h1 className="text-3xl font-bold mb-8 font-headline">Checkout</h1>
+      <h1 className="text-3xl font-bold mb-8 font-headline">Submit Inquiry</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-          <form onSubmit={handleProcessOrder} className="space-y-4">
+          <h2 className="text-xl font-semibold mb-4">Your Information</h2>
+          <form onSubmit={handleProcessInquiry} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="you@example.com" required />
@@ -151,26 +150,26 @@ export default function CheckoutPage() {
                 <Input id="city" name="city" type="text" placeholder="Anytown" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
+                <Label htmlFor="state">State / Province</Label>
                 <Input id="state" name="state" type="text" placeholder="CA" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="zip">ZIP Code</Label>
+                <Label htmlFor="zip">ZIP / Postal Code</Label>
                 <Input id="zip" name="zip" type="text" placeholder="12345" required />
               </div>
             </div>
             <Button type="submit" disabled={isProcessing} className="w-full" size="lg">
-              {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Placing Order...</> : "Place Order"}
+              {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : "Submit Inquiry"}
             </Button>
           </form>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Order Summary</CardTitle>
+            <CardTitle>Inquiry Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {cart.map(item => (
+              {inquiry.map(item => (
                 <div key={item.product.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {item.product.imageUrls && item.product.imageUrls.length > 0 ? (
@@ -188,16 +187,8 @@ export default function CheckoutPage() {
               ))}
             </div>
             <div className="mt-6 border-t pt-4 space-y-2">
-              <div className="flex justify-between text-muted-foreground">
-                <p>Subtotal</p>
-                <p>₱{subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <p>Shipping</p>
-                <p>₱{shipping.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-              </div>
               <div className="flex justify-between font-bold text-lg">
-                <p>Total</p>
+                <p>Estimated Total</p>
                 <p>₱{total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
             </div>

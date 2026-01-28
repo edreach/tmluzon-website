@@ -187,36 +187,6 @@
         "email"
       ]
     },
-    "CartItem": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "CartItem",
-      "type": "object",
-      "description": "Represents an item added to the shopping cart.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the cart item."
-        },
-        "productId": {
-          "type": "string",
-          "description": "Reference to Product. (Relationship: Product 1:N CartItem)"
-        },
-        "quantity": {
-          "type": "number",
-          "description": "The quantity of the product in the cart."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N CartItem)"
-        }
-      },
-      "required": [
-        "id",
-        "productId",
-        "quantity",
-        "userId"
-      ]
-    },
     "SiteSettings": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "SiteSettings",
@@ -433,26 +403,6 @@
             {
               "name": "customerReviewId",
               "description": "The unique identifier for the customer review."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/cart_items/{cartItemId}",
-        "definition": {
-          "entityName": "CartItem",
-          "schema": {
-            "$ref": "#/backend/entities/CartItem"
-          },
-          "description": "Stores items added to the customer's shopping cart.  Uses path-based ownership.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the customer who owns the cart."
-            },
-            {
-              "name": "cartItemId",
-              "description": "The unique identifier for the cart item."
             }
           ]
         }

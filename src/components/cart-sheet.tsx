@@ -2,28 +2,28 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCart } from "@/contexts/cart-context";
+import { useInquiry } from "@/contexts/cart-context";
 import { Button } from "./ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 
 export default function CartSheetContent() {
-  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
-  const subtotal = cart.reduce(
+  const { inquiry, updateQuantity, removeFromInquiry } = useInquiry();
+  const subtotal = inquiry.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
     0
   );
 
-  if (cart.length === 0) {
+  if (inquiry.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-        <h3 className="text-lg font-semibold">Your cart is empty</h3>
+        <h3 className="text-lg font-semibold">Your inquiry list is empty</h3>
         <p className="text-muted-foreground">
-          Looks like you haven't added anything to your cart yet.
+          Looks like you haven't added anything to your inquiry list yet.
         </p>
         <Button asChild>
-          <Link href="/">Start Shopping</Link>
+          <Link href="/products">Browse Products</Link>
         </Button>
       </div>
     );
@@ -33,7 +33,7 @@ export default function CartSheetContent() {
     <>
       <ScrollArea className="flex-grow">
         <div className="flex flex-col gap-4 px-6 py-2">
-          {cart.map((item) => (
+          {inquiry.map((item) => (
             <div key={item.product.id} className="flex items-center gap-4">
               <div className="relative h-20 w-20 overflow-hidden rounded-md">
                 {item.product.imageUrls && item.product.imageUrls.length > 0 ? (
@@ -71,7 +71,7 @@ export default function CartSheetContent() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => removeFromCart(item.product.id)}
+                onClick={() => removeFromInquiry(item.product.id)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -85,10 +85,10 @@ export default function CartSheetContent() {
           <span>₱{subtotal.toFixed(2)}</span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Shipping and taxes calculated at checkout.
+          You can submit this inquiry to get a quote.
         </p>
         <Button asChild className="mt-4 w-full" size="lg">
-          <Link href="/checkout">Proceed to Checkout</Link>
+          <Link href="/checkout">Submit Inquiry</Link>
         </Button>
       </div>
     </>

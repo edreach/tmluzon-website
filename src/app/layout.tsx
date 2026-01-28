@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
-import { CartProvider } from "@/contexts/cart-context";
+import { InquiryProvider } from "@/contexts/cart-context";
 import { ConditionalHeader, ConditionalFooter } from "@/components/conditional-layout";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 
@@ -31,11 +31,11 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased flex flex-col h-full", inter.variable)}>
         <FirebaseClientProvider>
-          <CartProvider>
+          <InquiryProvider>
             <ConditionalHeader />
             <main className="flex-grow">{children}</main>
             <ConditionalFooter />
-          </CartProvider>
+          </InquiryProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

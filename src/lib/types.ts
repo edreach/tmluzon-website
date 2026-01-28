@@ -35,7 +35,7 @@ export type Review = {
   date: string;
 };
 
-export type CartItem = {
+export type InquiryCartItem = {
   product: Product;
   quantity: number;
 };

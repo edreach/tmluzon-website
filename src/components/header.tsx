@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, ShoppingCart } from "lucide-react";
-import { useCart } from "@/contexts/cart-context";
+import { Menu, ClipboardList } from "lucide-react";
+import { useInquiry } from "@/contexts/cart-context";
 import CartSheetContent from "./cart-sheet";
 import { useState } from "react";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -23,8 +23,8 @@ const navLinks = [
 ];
 
 export default function Header() {
-  const { cart } = useCart();
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const { inquiry } = useInquiry();
+  const itemCount = inquiry.reduce((sum, item) => sum + item.quantity, 0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const firestore = useFirestore();
@@ -76,18 +76,18 @@ export default function Header() {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
+                <ClipboardList className="h-5 w-5" />
                 {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {itemCount}
                   </span>
                 )}
-                <span className="sr-only">Open cart</span>
+                <span className="sr-only">Open inquiry list</span>
               </Button>
             </SheetTrigger>
             <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg text-foreground">
               <SheetHeader className="px-6">
-                <SheetTitle>Shopping Cart</SheetTitle>
+                <SheetTitle>Inquiry List</SheetTitle>
               </SheetHeader>
               <CartSheetContent />
             </SheetContent>

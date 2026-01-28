@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-context";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { useInquiry } from "@/contexts/cart-context";
+import { Minus, Plus, ClipboardList } from "lucide-react";
 import type { Product } from "@/lib/types";
 
 interface AddToCartButtonProps {
@@ -12,10 +12,10 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const { addToInquiry } = useInquiry();
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const handleAddToInquiry = () => {
+    addToInquiry(product, quantity);
     setQuantity(1);
   };
 
@@ -40,9 +40,9 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
             <Plus className="h-4 w-4" />
             </Button>
         </div>
-        <Button onClick={handleAddToCart} className="flex-1" variant="outline">
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            Add to Cart
+        <Button onClick={handleAddToInquiry} className="flex-1" variant="outline">
+            <ClipboardList className="mr-2 h-5 w-5" />
+            Add to Inquiry
         </Button>
     </div>
   );

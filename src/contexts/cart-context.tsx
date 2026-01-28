@@ -1,72 +1,72 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import type { CartItem, Product } from "@/lib/types";
+import type { InquiryCartItem, Product } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
-interface CartContextType {
-  cart: CartItem[];
-  addToCart: (product: Product, quantity: number) => void;
-  removeFromCart: (productId: string) => void;
+interface InquiryContextType {
+  inquiry: InquiryCartItem[];
+  addToInquiry: (product: Product, quantity: number) => void;
+  removeFromInquiry: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
+  clearInquiry: () => void;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const InquiryContext = createContext<InquiryContextType | undefined>(undefined);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+export function InquiryProvider({ children }: { children: ReactNode }) {
+  const [inquiry, setInquiry] = useState<InquiryCartItem[]>([]);
   const { toast } = useToast();
 
-  const addToCart = (product: Product, quantity: number) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.product.id === product.id);
+  const addToInquiry = (product: Product, quantity: number) => {
+    setInquiry((prevInquiry) => {
+      const existingItem = prevInquiry.find((item) => item.product.id === product.id);
       if (existingItem) {
-        return prevCart.map((item) =>
+        return prevInquiry.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prevCart, { product, quantity }];
+      return [...prevInquiry, { product, quantity }];
     });
     toast({
-      title: "Added to cart",
+      title: "Added to inquiry",
       description: `${quantity} x ${product.name}`,
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
+  const removeFromInquiry = (productId: string) => {
+    setInquiry((prevInquiry) => prevInquiry.filter((item) => item.product.id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromInquiry(productId);
       return;
     }
-    setCart((prevCart) =>
-      prevCart.map((item) =>
+    setInquiry((prevInquiry) =>
+      prevInquiry.map((item) =>
         item.product.id === productId ? { ...item, quantity } : item
       )
     );
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const clearInquiry = () => {
+    setInquiry([]);
   }
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}>
+    <InquiryContext.Provider value={{ inquiry, addToInquiry, removeFromInquiry, updateQuantity, clearInquiry }}>
       {children}
-    </CartContext.Provider>
+    </InquiryContext.Provider>
   );
 }
 
-export function useCart() {
-  const context = useContext(CartContext);
+export function useInquiry() {
+  const context = useContext(InquiryContext);
   if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error("useInquiry must be used within a InquiryProvider");
   }
   return context;
 }
