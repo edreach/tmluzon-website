@@ -66,64 +66,7 @@ export default function Home() {
   return (
     <div className="bg-background text-foreground">
       <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column */}
-            {isLoading && (
-              <>
-                <Skeleton className="lg:col-span-2 rounded-xl h-[450px]" />
-                <div className="flex flex-col gap-8">
-                  <Skeleton className="rounded-xl flex-1 h-[209px]" />
-                  <Skeleton className="rounded-xl flex-1 h-[209px]" />
-                </div>
-              </>
-            )}
-            {!isLoading && latestNews && (
-              <Link href="/news" className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
-                  <Image src={latestNews.imageUrl || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
-                      <h2 className="text-3xl md:text-4xl font-bold">{latestNews.title}</h2>
-                      <p className="mt-2 text-sm text-white/80">{format(new Date(latestNews.date), 'MMMM d, yyyy')}</p>
-                      <Button className="mt-4 w-fit">Read More</Button>
-                  </div>
-              </Link>
-            )}
-             {!isLoading && !latestNews && (
-                <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] bg-muted flex items-center justify-center">
-                    <p className="text-muted-foreground">No recent news.</p>
-                </div>
-            )}
-
-
-            {/* Right Column */}
-            <div className="flex flex-col gap-8">
-                {!isLoading && secondNews && (
-                  <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
-                      <Image src={secondNews.imageUrl || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
-                      <div className="absolute inset-0 bg-black/40" />
-                      <div className="relative h-full flex items-end p-6 text-white">
-                          <h3 className="text-2xl font-bold">{secondNews.title}</h3>
-                      </div>
-                  </Link>
-                )}
-                 {!isLoading && thirdNews && (
-                  <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
-                      <Image src={thirdNews.imageUrl || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
-                      <div className="absolute inset-0 bg-black/40" />
-                      <div className="relative h-full flex items-end p-6 text-white">
-                          <h3 className="text-2xl font-bold">{thirdNews.title}</h3>
-                      </div>
-                  </Link>
-                )}
-                 {!isLoading && !secondNews && (
-                    <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted flex items-center justify-center">
-                       <p className="text-muted-foreground text-sm">No other news.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-        
-        <div className="text-center mt-16">
+        <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             Comprehensive HVAC Solutions
           </h1>
@@ -269,6 +212,73 @@ export default function Home() {
               <Link href="/products">View All Products</Link>
             </Button>
           </div>
+        </div>
+
+        <div className="mt-24">
+            <div className="text-center">
+                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl font-headline">
+                    Latest News & Updates
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                    Stay informed about our company, new products, and special offers.
+                </p>
+            </div>
+            <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column */}
+                {isLoading && (
+                <>
+                    <Skeleton className="lg:col-span-2 rounded-xl h-[450px]" />
+                    <div className="flex flex-col gap-8">
+                    <Skeleton className="rounded-xl flex-1 h-[209px]" />
+                    <Skeleton className="rounded-xl flex-1 h-[209px]" />
+                    </div>
+                </>
+                )}
+                {!isLoading && latestNews && (
+                <Link href="/news" className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
+                    <Image src={latestNews.imageUrl || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
+                        <h2 className="text-3xl md:text-4xl font-bold">{latestNews.title}</h2>
+                        <p className="mt-2 text-sm text-white/80">{format(new Date(latestNews.date), 'MMMM d, yyyy')}</p>
+                        <Button className="mt-4 w-fit">Read More</Button>
+                    </div>
+                </Link>
+                )}
+                {!isLoading && !latestNews && (
+                    <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] bg-muted flex items-center justify-center">
+                        <p className="text-muted-foreground">No recent news.</p>
+                    </div>
+                )}
+
+
+                {/* Right Column */}
+                <div className="flex flex-col gap-8">
+                    {!isLoading && secondNews && (
+                    <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                        <Image src={secondNews.imageUrl || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
+                        <div className="absolute inset-0 bg-black/40" />
+                        <div className="relative h-full flex items-end p-6 text-white">
+                            <h3 className="text-2xl font-bold">{secondNews.title}</h3>
+                        </div>
+                    </Link>
+                    )}
+                    {!isLoading && thirdNews && (
+                    <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                        <Image src={thirdNews.imageUrl || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
+                        <div className="absolute inset-0 bg-black/40" />
+                        <div className="relative h-full flex items-end p-6 text-white">
+                            <h3 className="text-2xl font-bold">{thirdNews.title}</h3>
+                        </div>
+                    </Link>
+                    )}
+                    {!isLoading && !secondNews && (
+                        <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted flex items-center justify-center">
+                        <p className="text-muted-foreground text-sm">No other news.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
 
       </div>
