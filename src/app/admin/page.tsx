@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
@@ -95,22 +96,24 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-            <div className="mx-auto mb-4 h-20 w-48 relative">
-              {isLoadingSettings ? (
-                <Skeleton className="h-full w-full" />
-              ) : siteSettings?.logoUrl ? (
-                <Image
-                  src={siteSettings.logoUrl}
-                  alt="Company Logo"
-                  fill
-                  className="object-contain"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                  Company Logo
-                </div>
-              )}
-            </div>
+            <Link href="/" className="block">
+              <div className="mx-auto mb-4 h-24 w-64 relative">
+                {isLoadingSettings ? (
+                  <Skeleton className="h-full w-full" />
+                ) : siteSettings?.logoUrl ? (
+                  <Image
+                    src={siteSettings.logoUrl}
+                    alt="Company Logo"
+                    fill
+                    className="object-contain"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+                    Company Logo
+                  </div>
+                )}
+              </div>
+            </Link>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard.</CardDescription>
         </CardHeader>
