@@ -1,3 +1,6 @@
+'use client';
+
+import * as React from 'react';
 import {
     Card,
     CardContent,
@@ -14,66 +17,20 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-type Inquiry = {
-    id: string;
-    customer: {
-        name: string;
-        email: string;
-    };
-    date: string;
-    total: number;
-    status: "New" | "Viewed" | "Completed";
-    items: {
-        name: string;
-        quantity: number;
-        price: number;
-    }[];
-};
-
-const inquiries: Inquiry[] = [
-    {
-        id: "INQ-001",
-        customer: {
-            name: "John Doe",
-            email: "john.doe@example.com",
-        },
-        date: "2024-07-29",
-        total: 258.00,
-        status: "New",
-        items: [
-            { name: "Aero Minimalist Lamp", quantity: 2, price: 129.00 },
-        ],
-    },
-    {
-        id: "INQ-002",
-        customer: {
-            name: "Jane Smith",
-            email: "jane.smith@example.com",
-        },
-        date: "2024-07-28",
-        total: 129.00,
-        status: "Viewed",
-        items: [
-            { name: "Aero Minimalist Lamp", quantity: 1, price: 129.00 },
-        ],
-    },
-    {
-        id: "INQ-003",
-        customer: {
-            name: "Michael Johnson",
-            email: "michael.j@example.com",
-        },
-        date: "2024-07-27",
-        total: 387.00,
-        status: "Completed",
-        items: [
-            { name: "Aero Minimalist Lamp", quantity: 3, price: 129.00 },
-        ],
-    },
-];
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import type { Inquiry } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 export default function InquiriesPage() {
+    const firestore = useFirestore();
+    const inquiriesQuery = useMemoFirebase(
+        () => (firestore ? query(collection(firestore, 'inquiries'), orderBy('inquiryDate', 'desc')) : null),
+        [firestore]
+    );
+    const { data: inquiries, isLoading } = useCollection<Inquiry>(inquiriesQuery);
+
     return (
         <>
             <div className="flex items-center">
@@ -98,22 +55,38 @@ export default function InquiriesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {inquiries.map((inquiry) => (
+                            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-40 mt-1" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                                </TableRow>
+                            ))}
+                            {!isLoading && inquiries?.map((inquiry) => (
                                 <TableRow key={inquiry.id}>
-                                    <TableCell className="font-medium">{inquiry.id}</TableCell>
+                                    <TableCell className="font-medium truncate" style={{ maxWidth: '120px' }}>{inquiry.id}</TableCell>
                                     <TableCell>
-                                        <div className="font-medium">{inquiry.customer.name}</div>
-                                        <div className="text-sm text-muted-foreground">{inquiry.customer.email}</div>
+                                        <div className="font-medium">{inquiry.customerName}</div>
+                                        <div className="text-sm text-muted-foreground">{inquiry.customerEmail}</div>
                                     </TableCell>
-                                    <TableCell>{inquiry.date}</TableCell>
+                                    <TableCell>{format(new Date(inquiry.inquiryDate), 'PP')}</TableCell>
                                     <TableCell>
                                         <Badge variant={inquiry.status === 'New' ? 'default' : inquiry.status === 'Viewed' ? 'secondary' : 'outline'}>
                                             {inquiry.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">₱{inquiry.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                    <TableCell className="text-right">₱{inquiry.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                 </TableRow>
                             ))}
+                            {!isLoading && inquiries?.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-24 text-center">
+                                        No inquiries found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

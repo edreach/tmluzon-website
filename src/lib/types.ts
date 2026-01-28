@@ -109,4 +109,25 @@ export type BrandData = {
 };
 export type Brand = BrandData & { id: string };
 
-    
+export type InquiryItem = {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+};
+
+export type InquiryData = {
+  customerName: string;
+  customerEmail: string;
+  shippingAddress: {
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  inquiryDate: string; // ISO date string
+  totalAmount: number;
+  status: 'New' | 'Viewed' | 'Completed';
+  items: InquiryItem[];
+};
+export type Inquiry = InquiryData & { id: string };

@@ -1,37 +1,37 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
-import { useActionState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/cart-context";
-import { processOrder } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { z } from "zod";
+import type { InquiryData } from "@/lib/types";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full" size="lg">
-      {pending ? "Placing Order..." : "Place Order"}
-    </Button>
-  );
-}
+const OrderSchema = z.object({
+  customerEmail: z.string().email(),
+  customerName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  address: z.string().min(5, { message: "Address is required." }),
+  city: z.string().min(2, { message: "City is required." }),
+  state: z.string().min(2, { message: "State is required." }),
+  zip: z.string().min(5, { message: "Valid ZIP code is required." }),
+});
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
+  const firestore = useFirestore();
 
-  const [state, formAction] = useActionState(processOrder, {
-    message: "",
-    success: false,
-  });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
@@ -41,27 +41,80 @@ export default function CheckoutPage() {
   const total = subtotal + shipping;
 
   useEffect(() => {
-    if (cart.length === 0) {
+    if (cart.length === 0 && !isProcessing) {
       router.push('/');
     }
-  }, [cart, router]);
-  
-  useEffect(() => {
-    if (state.success) {
-      toast({
-        title: "Order Placed!",
-        description: "Thank you for your purchase. We've received your order.",
-      });
-      clearCart();
-      router.push("/");
-    } else if (state.message) {
-      toast({
-        title: "Error",
-        description: state.message,
-        variant: "destructive",
-      });
-    }
-  }, [state, clearCart, router, toast]);
+  }, [cart, router, isProcessing]);
+
+  const handleProcessOrder = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsProcessing(true);
+
+      if (!firestore) {
+          toast({ title: "Error", description: "Could not connect to the database.", variant: "destructive" });
+          setIsProcessing(false);
+          return;
+      }
+
+      const formData = new FormData(e.currentTarget);
+      const data = {
+          customerEmail: formData.get("email") as string,
+          customerName: formData.get("name") as string,
+          address: formData.get("address") as string,
+          city: formData.get("city") as string,
+          state: formData.get("state") as string,
+          zip: formData.get("zip") as string,
+      };
+
+      const parsed = OrderSchema.safeParse(data);
+
+      if (!parsed.success) {
+          toast({
+              title: "Validation Error",
+              description: parsed.error.errors.map((e) => e.message).join(", "),
+              variant: "destructive",
+          });
+          setIsProcessing(false);
+          return;
+      }
+
+      const inquiryData: InquiryData = {
+          customerName: parsed.data.customerName,
+          customerEmail: parsed.data.customerEmail,
+          shippingAddress: {
+            address: parsed.data.address,
+            city: parsed.data.city,
+            state: parsed.data.state,
+            zip: parsed.data.zip,
+          },
+          inquiryDate: new Date().toISOString(),
+          totalAmount: total,
+          status: 'New',
+          items: cart.map(item => ({
+              productId: item.product.id,
+              productName: item.product.name,
+              quantity: item.quantity,
+              price: item.product.price,
+          })),
+      };
+
+      try {
+          addDocumentNonBlocking(collection(firestore, 'inquiries'), inquiryData);
+          toast({
+              title: "Order Placed!",
+              description: "Thank you for your purchase. We've received your order.",
+          });
+          clearCart();
+          router.push("/");
+      } catch (error: any) {
+          toast({
+              title: "Error",
+              description: error.message || "Failed to place order.",
+              variant: "destructive",
+          });
+          setIsProcessing(false);
+      }
+  };
 
   if (cart.length === 0) {
     return null;
@@ -79,8 +132,7 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
           <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-          <form action={formAction} className="space-y-4">
-            <input type="hidden" name="cart" value={JSON.stringify(cart)} />
+          <form onSubmit={handleProcessOrder} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="you@example.com" required />
@@ -107,7 +159,9 @@ export default function CheckoutPage() {
                 <Input id="zip" name="zip" type="text" placeholder="12345" required />
               </div>
             </div>
-            <SubmitButton />
+            <Button type="submit" disabled={isProcessing} className="w-full" size="lg">
+              {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Placing Order...</> : "Place Order"}
+            </Button>
           </form>
         </div>
         <Card>

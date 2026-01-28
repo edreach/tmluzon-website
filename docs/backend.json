@@ -208,80 +208,6 @@
         "userId"
       ]
     },
-    "Order": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Order",
-      "type": "object",
-      "description": "Represents an order placed by a customer.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the order."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Order)"
-        },
-        "orderDate": {
-          "type": "string",
-          "description": "The date the order was placed.",
-          "format": "date-time"
-        },
-        "totalAmount": {
-          "type": "number",
-          "description": "The total amount of the order."
-        },
-        "orderItems": {
-          "type": "array",
-          "description": "A list of order item IDs associated with the order.",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "orderDate",
-        "totalAmount",
-        "orderItems"
-      ]
-    },
-    "OrderItem": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "OrderItem",
-      "type": "object",
-      "description": "Represents an item in an order.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the order item."
-        },
-        "orderId": {
-          "type": "string",
-          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
-        },
-        "productId": {
-          "type": "string",
-          "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
-        },
-        "quantity": {
-          "type": "number",
-          "description": "The quantity of the product in the order item."
-        },
-        "price": {
-          "type": "number",
-          "description": "The price of the product in the order item."
-        }
-      },
-      "required": [
-        "id",
-        "orderId",
-        "productId",
-        "quantity",
-        "price"
-      ]
-    },
     "SiteSettings": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "SiteSettings",
@@ -377,6 +303,54 @@
         "content": { "type": "string" }
       },
       "required": ["title", "date", "content"]
+    },
+    "Inquiry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Inquiry",
+      "type": "object",
+      "description": "Represents a customer inquiry or order from the public website.",
+      "properties": {
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "shippingAddress": {
+          "type": "object",
+          "properties": {
+            "address": { "type": "string" },
+            "city": { "type": "string" },
+            "state": { "type": "string" },
+            "zip": { "type": "string" }
+          },
+          "required": ["address", "city", "state", "zip"]
+        },
+        "inquiryDate": { "type": "string", "format": "date-time" },
+        "totalAmount": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": ["New", "Viewed", "Completed"]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "productName": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            },
+            "required": ["productId", "productName", "quantity", "price"]
+          }
+        }
+      },
+      "required": [
+        "customerName",
+        "customerEmail",
+        "shippingAddress",
+        "inquiryDate",
+        "totalAmount",
+        "status",
+        "items"
+      ]
     }
   },
   "auth": {
@@ -476,42 +450,6 @@
         }
       },
       {
-        "path": "/users/{userId}/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Stores orders placed by customers.  Uses path-based ownership.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the customer who placed the order."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier for the order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/orders_items/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Stores individual items within an order.",
-          "params": [
-            {
-              "name": "orderItemId",
-              "description": "The unique identifier for the order item."
-            }
-          ]
-        }
-      },
-      {
         "path": "/roles_admin/{userId}",
         "definition": {
           "entityName": "UserProfile",
@@ -582,6 +520,22 @@
             {
               "name": "brandId",
               "description": "The unique identifier for the brand."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/inquiries/{inquiryId}",
+        "definition": {
+          "entityName": "Inquiry",
+          "schema": {
+            "$ref": "#/backend/entities/Inquiry"
+          },
+          "description": "Stores customer inquiries from the public website. Admins can view and manage these.",
+          "params": [
+            {
+              "name": "inquiryId",
+              "description": "The unique ID for the inquiry."
             }
           ]
         }
