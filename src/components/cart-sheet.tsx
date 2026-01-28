@@ -8,7 +8,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 
-export default function CartSheetContent() {
+export default function CartSheetContent({ onClose }: { onClose?: () => void }) {
   const { inquiry, updateQuantity, removeFromInquiry } = useInquiry();
 
   if (inquiry.length === 0) {
@@ -19,7 +19,7 @@ export default function CartSheetContent() {
           Looks like you haven't added anything to your inquiry list yet.
         </p>
         <Button asChild>
-          <Link href="/products">Browse Products</Link>
+          <Link href="/products" onClick={onClose}>Browse Products</Link>
         </Button>
       </div>
     );
@@ -77,7 +77,7 @@ export default function CartSheetContent() {
           You can submit this inquiry to get a quote.
         </p>
         <Button asChild className="mt-4 w-full" size="lg">
-          <Link href="/checkout">Submit Inquiry</Link>
+          <Link href="/checkout" onClick={onClose}>Submit Inquiry</Link>
         </Button>
       </div>
     </>

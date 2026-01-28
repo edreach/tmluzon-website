@@ -272,19 +272,10 @@
       "description": "Represents a customer inquiry or order from the public website.",
       "properties": {
         "customerName": { "type": "string" },
-        "customerEmail": { "type": "string" },
-        "shippingAddress": {
-          "type": "object",
-          "properties": {
-            "address": { "type": "string" },
-            "city": { "type": "string" },
-            "state": { "type": "string" },
-            "zip": { "type": "string" }
-          },
-          "required": ["address", "city", "state", "zip"]
-        },
+        "customerEmail": { "type": "string", "format": "email" },
+        "customerContact": { "type": "string" },
+        "message": { "type": "string", "description": "Optional message from the customer." },
         "inquiryDate": { "type": "string", "format": "date-time" },
-        "totalAmount": { "type": "number" },
         "status": {
           "type": "string",
           "enum": ["New", "Viewed", "Completed"]
@@ -296,19 +287,17 @@
             "properties": {
               "productId": { "type": "string" },
               "productName": { "type": "string" },
-              "quantity": { "type": "number" },
-              "price": { "type": "number" }
+              "quantity": { "type": "number" }
             },
-            "required": ["productId", "productName", "quantity", "price"]
+            "required": ["productId", "productName", "quantity"]
           }
         }
       },
       "required": [
         "customerName",
         "customerEmail",
-        "shippingAddress",
+        "customerContact",
         "inquiryDate",
-        "totalAmount",
         "status",
         "items"
       ]

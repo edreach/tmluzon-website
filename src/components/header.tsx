@@ -26,6 +26,8 @@ export default function Header() {
   const { inquiry } = useInquiry();
   const itemCount = inquiry.reduce((sum, item) => sum + item.quantity, 0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartSheetOpen, setCartSheetOpen] = useState(false);
+
 
   const firestore = useFirestore();
   const settingsRef = useMemoFirebase(
@@ -64,7 +66,7 @@ export default function Header() {
             <Link
               key={link.label}
               href={link.href}
-              className="transition-colors hover:text-primary whitespace-nowrap"
+              className="transition-colors hover:text-primary whitespace-nowrap text-lg"
             >
               {link.label}
             </Link>
@@ -73,7 +75,7 @@ export default function Header() {
 
         {/* RIGHT: Cart, Login, and Mobile Toggle */}
         <div className="flex items-center justify-end space-x-2">
-          <Sheet>
+          <Sheet open={cartSheetOpen} onOpenChange={setCartSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <ClipboardList className="h-5 w-5" />
@@ -89,7 +91,7 @@ export default function Header() {
               <SheetHeader className="px-6">
                 <SheetTitle>Inquiry List</SheetTitle>
               </SheetHeader>
-              <CartSheetContent />
+              <CartSheetContent onClose={() => setCartSheetOpen(false)}/>
             </SheetContent>
           </Sheet>
           

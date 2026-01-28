@@ -15,14 +15,13 @@ import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { z } from "zod";
 import type { InquiryData } from "@/lib/types";
+import { Textarea } from "@/components/ui/textarea";
 
 const InquiryFormSchema = z.object({
   customerEmail: z.string().email(),
   customerName: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  address: z.string().min(5, { message: "Address is required." }),
-  city: z.string().min(2, { message: "City is required." }),
-  state: z.string().min(2, { message: "State is required." }),
-  zip: z.string().min(5, { message: "Valid ZIP code is required." }),
+  customerContact: z.string().min(7, { message: "A valid contact number is required." }),
+  message: z.string().optional(),
 });
 
 export default function CheckoutPage() {
@@ -53,10 +52,8 @@ export default function CheckoutPage() {
       const data = {
           customerEmail: formData.get("email") as string,
           customerName: formData.get("name") as string,
-          address: formData.get("address") as string,
-          city: formData.get("city") as string,
-          state: formData.get("state") as string,
-          zip: formData.get("zip") as string,
+          customerContact: formData.get("contactNumber") as string,
+          message: formData.get("message") as string,
       };
 
       const parsed = InquiryFormSchema.safeParse(data);
@@ -74,20 +71,14 @@ export default function CheckoutPage() {
       const inquiryData: InquiryData = {
           customerName: parsed.data.customerName,
           customerEmail: parsed.data.customerEmail,
-          shippingAddress: {
-            address: parsed.data.address,
-            city: parsed.data.city,
-            state: parsed.data.state,
-            zip: parsed.data.zip,
-          },
+          customerContact: parsed.data.customerContact,
+          message: parsed.data.message,
           inquiryDate: new Date().toISOString(),
-          totalAmount: 0,
           status: 'New',
           items: inquiry.map(item => ({
               productId: item.product.id,
               productName: item.product.name,
               quantity: item.quantity,
-              price: 0,
           })),
       };
 
@@ -135,22 +126,12 @@ export default function CheckoutPage() {
               <Input id="name" name="name" type="text" placeholder="John Doe" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" name="address" type="text" placeholder="123 Main St" required />
+              <Label htmlFor="contactNumber">Contact Number</Label>
+              <Input id="contactNumber" name="contactNumber" type="tel" placeholder="09123456789" required />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" name="city" type="text" placeholder="Anytown" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State / Province</Label>
-                <Input id="state" name="state" type="text" placeholder="CA" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zip">ZIP / Postal Code</Label>
-                <Input id="zip" name="zip" type="text" placeholder="12345" required />
-              </div>
+             <div className="space-y-2">
+              <Label htmlFor="message">Message (Optional)</Label>
+              <Textarea id="message" name="message" placeholder="Include any special requests or questions here..." />
             </div>
             <Button type="submit" disabled={isProcessing} className="w-full" size="lg">
               {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : "Submit Inquiry"}

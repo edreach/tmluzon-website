@@ -47,37 +47,37 @@ export default function InquiriesPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Inquiry ID</TableHead>
                                 <TableHead>Customer</TableHead>
+                                <TableHead>Contact</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
+                                <TableHead className="text-right">Items</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading && Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
-                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-40 mt-1" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                                     <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-4 w-10 ml-auto" /></TableCell>
                                 </TableRow>
                             ))}
                             {!isLoading && inquiries?.map((inquiry) => (
                                 <TableRow key={inquiry.id}>
-                                    <TableCell className="font-medium truncate" style={{ maxWidth: '120px' }}>{inquiry.id}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{inquiry.customerName}</div>
                                         <div className="text-sm text-muted-foreground">{inquiry.customerEmail}</div>
                                     </TableCell>
+                                    <TableCell>{inquiry.customerContact}</TableCell>
                                     <TableCell>{format(new Date(inquiry.inquiryDate), 'PP')}</TableCell>
                                     <TableCell>
                                         <Badge variant={inquiry.status === 'New' ? 'default' : inquiry.status === 'Viewed' ? 'secondary' : 'outline'}>
                                             {inquiry.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">₱{inquiry.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                    <TableCell className="text-right">{inquiry.items.length}</TableCell>
                                 </TableRow>
                             ))}
                             {!isLoading && inquiries?.length === 0 && (

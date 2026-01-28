@@ -111,20 +111,14 @@ export type InquiryItem = {
   productId: string;
   productName: string;
   quantity: number;
-  price: number;
 };
 
 export type InquiryData = {
   customerName: string;
   customerEmail: string;
-  shippingAddress: {
-    address: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
+  customerContact: string;
+  message?: string;
   inquiryDate: string; // ISO date string
-  totalAmount: number;
   status: 'New' | 'Viewed' | 'Completed';
   items: InquiryItem[];
 };
