@@ -110,54 +110,6 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
     }
   };
 
-  const handleUploadImages = async () => {
-    if (imageFiles.length === 0 || !storage) return;
-    setIsUploading(true);
-    setUploadProgress({});
-
-    const uploadPromises = imageFiles.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const sRef = storageRef(storage, `products/${Date.now()}-${file.name}`);
-        const uploadTask = uploadBytesResumable(sRef, file);
-
-        uploadTask.on('state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadProgress(prev => ({ ...prev, [file.name]: progress }));
-          },
-          (error) => {
-            console.error(`Upload failed for ${file.name}:`, error);
-            reject(error);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL);
-            });
-          }
-        );
-      });
-    });
-
-    try {
-      const urls = await Promise.all(uploadPromises);
-      setImageUrls(prev => [...prev, ...urls]);
-      setImageFiles([]);
-      toast({
-        title: 'Upload complete',
-        description: `${urls.length} image(s) have been uploaded.`,
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Upload Failed',
-        description: 'Some images failed to upload. Please check the console and storage rules.',
-      });
-    } finally {
-      setIsUploading(false);
-      setUploadProgress({});
-    }
-  };
-
   const handleRemoveImage = (urlToRemove: string) => {
       setImageUrls(prev => prev.filter(url => url !== urlToRemove));
   };
@@ -173,15 +125,52 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
     e.preventDefault();
     setIsSaving(true);
     
-    if (!firestore) {
-        toast({ title: 'Error', description: 'Firestore is not available.', variant: 'destructive' });
+    if (!firestore || !storage) {
+        toast({ title: 'Error', description: 'Firebase is not available.', variant: 'destructive' });
         setIsSaving(false);
         return;
     }
 
+    let finalImageUrls = [...imageUrls];
+
+    if (imageFiles.length > 0) {
+        setIsUploading(true);
+        setUploadProgress({});
+        
+        try {
+            const uploadedUrls = await Promise.all(
+                imageFiles.map(file => new Promise<string>((resolve, reject) => {
+                    const sRef = storageRef(storage, `products/${Date.now()}-${file.name}`);
+                    const uploadTask = uploadBytesResumable(sRef, file);
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            setUploadProgress(prev => ({ ...prev, [file.name]: progress }));
+                        },
+                        (error) => reject(error),
+                        () => getDownloadURL(uploadTask.snapshot.ref).then(resolve)
+                    );
+                }))
+            );
+            finalImageUrls = [...finalImageUrls, ...uploadedUrls];
+            setImageFiles([]);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Upload Failed',
+                description: 'Some images failed to upload. Please try again.',
+            });
+            setIsUploading(false);
+            setIsSaving(false);
+            return;
+        } finally {
+            setIsUploading(false);
+        }
+    }
+
     const productToSave = {
         ...product,
-        imageUrls: imageUrls,
+        imageUrls: finalImageUrls,
         price: Number(product.price) || 0,
     };
 
@@ -320,18 +309,13 @@ export default function ProductForm({ product: initialProduct }: ProductFormProp
                     <Upload className="h-8 w-8 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground mt-2">Add images</span>
                 </Label>
-                <Input id="image-upload" type="file" multiple className="sr-only" onChange={handleFileChange} disabled={isUploading} accept="image/*"/>
+                <Input id="image-upload" type="file" multiple className="sr-only" onChange={handleFileChange} disabled={isUploading || isSaving} accept="image/*"/>
             </div>
         </div>
 
         {imageFiles.length > 0 && (
-            <div className="space-y-2">
-                <Button type="button" onClick={handleUploadImages} disabled={isUploading}>
-                    {isUploading ? `Uploading...` : `Upload ${imageFiles.length} image(s)`}
-                </Button>
-                <div className="text-sm text-muted-foreground">
-                    {imageFiles.map(f => f.name).join(', ')}
-                </div>
+            <div className="text-sm text-muted-foreground mt-2">
+                New files to upload: {imageFiles.map(f => f.name).join(', ')}
             </div>
         )}
         {isUploading && (
