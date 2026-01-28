@@ -1,4 +1,3 @@
-import 'server-only';
 import * as admin from 'firebase-admin';
 
 // Check if the app is already initialized to prevent errors in hot-reloading environments.
