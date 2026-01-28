@@ -13,12 +13,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
-import type { Product, ProductData, Service, ServiceData } from '@/lib/types';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+import type { Product, ProductData, Service, ServiceData, NewsArticleData } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 export default function Home() {
   const firestore = useFirestore();
+
   const productsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
     [firestore]
@@ -30,6 +32,18 @@ export default function Home() {
     [firestore]
   );
   const { data: services, isLoading: isLoadingServices } = useCollection<ServiceData>(servicesQuery);
+
+  const newsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'news'), orderBy('date', 'desc'), limit(3)) : null),
+    [firestore]
+  );
+  const { data: newsItems, isLoading: isLoadingNews } = useCollection<NewsArticleData>(newsQuery);
+
+  const isLoading = isLoadingProducts || isLoadingServices || isLoadingNews;
+
+  const latestNews = newsItems?.[0];
+  const secondNews = newsItems?.[1];
+  const thirdNews = newsItems?.[2];
 
   const features = [
     {
@@ -54,39 +68,58 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
-            <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px]">
-                <Image src="https://picsum.photos/seed/rainy-promo/1200/900" alt="Rainy Season Promo" fill className="object-cover brightness-75" data-ai-hint="night sky church" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
-                    <h2 className="text-3xl md:text-4xl font-bold">Rainy Season Promo</h2>
-                    <div className="mt-2 text-sm flex items-center flex-wrap gap-x-2">
-                        <span>TM Luzon Engineering Sales & Services Company</span>
-                        <span>&bull;</span>
-                        <span>Prime Asiatique</span>
-                    </div>
-                    <p className="text-sm mt-1">Commercial Center, Buhay Na Tubig I</p>
-                    <Button className="mt-4 w-fit">Read More</Button>
+            {isLoading && (
+              <>
+                <Skeleton className="lg:col-span-2 rounded-xl h-[450px]" />
+                <div className="flex flex-col gap-8">
+                  <Skeleton className="rounded-xl flex-1 h-[209px]" />
+                  <Skeleton className="rounded-xl flex-1 h-[209px]" />
                 </div>
-            </div>
+              </>
+            )}
+            {!isLoading && latestNews && (
+              <Link href="/news" className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
+                  <Image src={latestNews.imageUrl || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white">
+                      <h2 className="text-3xl md:text-4xl font-bold">{latestNews.title}</h2>
+                      <p className="mt-2 text-sm text-white/80">{format(new Date(latestNews.date), 'MMMM d, yyyy')}</p>
+                      <Button className="mt-4 w-fit">Read More</Button>
+                  </div>
+              </Link>
+            )}
+             {!isLoading && !latestNews && (
+                <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] bg-muted flex items-center justify-center">
+                    <p className="text-muted-foreground">No recent news.</p>
+                </div>
+            )}
+
 
             {/* Right Column */}
             <div className="flex flex-col gap-8">
-                {/* Top small card */}
-                <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px]">
-                    <Image src="https://picsum.photos/seed/hiring1/600/400" alt="We are hiring" fill className="object-cover brightness-75" data-ai-hint="cactus plant" />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="relative h-full flex items-end p-6 text-white">
-                        <h3 className="text-2xl font-bold">We Are Hiring</h3>
+                {!isLoading && secondNews && (
+                  <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                      <Image src={secondNews.imageUrl || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="relative h-full flex items-end p-6 text-white">
+                          <h3 className="text-2xl font-bold">{secondNews.title}</h3>
+                      </div>
+                  </Link>
+                )}
+                 {!isLoading && thirdNews && (
+                  <Link href="/news" className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
+                      <Image src={thirdNews.imageUrl || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
+                      <div className="absolute inset-0 bg-black/40" />
+                      <div className="relative h-full flex items-end p-6 text-white">
+                          <h3 className="text-2xl font-bold">{thirdNews.title}</h3>
+                      </div>
+                  </Link>
+                )}
+                 {!isLoading && !secondNews && (
+                    <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted flex items-center justify-center">
+                       <p className="text-muted-foreground text-sm">No other news.</p>
                     </div>
-                </div>
-                {/* Bottom small card */}
-                <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px]">
-                    <Image src="https://picsum.photos/seed/hiring2/600/400" alt="We are hiring" fill className="object-cover brightness-75" data-ai-hint="grass field" />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="relative h-full flex items-end p-6 text-white">
-                        <h3 className="text-2xl font-bold">We Are Hiring!</h3>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
         
