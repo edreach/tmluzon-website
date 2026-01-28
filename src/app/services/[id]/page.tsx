@@ -1,7 +1,7 @@
 'use client';
 
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import type { ServiceData } from '@/lib/types';
+import type { Service, ServiceData, Product } from '@/lib/types';
 import { doc } from 'firebase/firestore';
 import { notFound, useParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import AddToCartButton from '@/components/add-to-cart-button';
 
 export default function ServiceDetailPage() {
   const params = useParams();
@@ -32,6 +33,23 @@ export default function ServiceDetailPage() {
     }
   }, [service]);
 
+  const fullService = service ? { ...service, id } as Service : null;
+
+  const serviceAsProduct: Product | null = fullService ? {
+    id: fullService.id,
+    name: fullService.name,
+    description: fullService.description,
+    imageUrls: fullService.imageUrls || [],
+    price: fullService.price || 0,
+    showPrice: fullService.showPrice,
+    // Dummy values for required Product fields
+    brand: 'TMLUZON',
+    type: 'Service',
+    subType: 'Service',
+    specifications: [],
+    stockStatus: 'In Stock',
+    discontinued: false,
+  } : null;
 
   if (isLoading) {
     return (
@@ -49,12 +67,13 @@ export default function ServiceDetailPage() {
           </div>
           <div className="space-y-6">
             <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-8 w-24" />
             <div className="space-y-2">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
             </div>
-            <Skeleton className="h-12 w-1/2" />
+            <Skeleton className="h-12 w-full" />
           </div>
         </div>
       </div>
@@ -115,15 +134,23 @@ export default function ServiceDetailPage() {
             )}
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-4">{service?.name}</h1>
-            <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap">
+            <h1 className="text-3xl lg:text-4xl font-bold font-headline mb-2">{service?.name}</h1>
+            {service?.showPrice !== false && (
+                <p className="text-2xl font-semibold text-primary mb-4">₱{service?.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            )}
+            <div className="text-lg text-foreground/80 space-y-4 whitespace-pre-wrap mb-6">
               <p>{service?.description}</p>
             </div>
-            <Button size="lg" className="mt-8" asChild>
-              <a href={`mailto:tmluzon.engineering@gmail.com?subject=Inquiry about ${service?.name}`}>
-                Inquire About This Service
-              </a>
-            </Button>
+             <div className="flex flex-col gap-4 mt-auto">
+                {serviceAsProduct && serviceAsProduct.price > 0 && (
+                    <AddToCartButton product={serviceAsProduct} />
+                )}
+                <Button size="lg" variant="outline" asChild>
+                <a href={`mailto:tmluzon.engineering@gmail.com?subject=Inquiry about ${service?.name}`}>
+                    Inquire About This Service
+                </a>
+                </Button>
+            </div>
           </div>
         </div>
       

@@ -44,6 +44,8 @@ export type ServiceData = {
   name: string;
   description: string;
   imageUrls: string[];
+  price: number;
+  showPrice?: boolean;
 };
 export type Service = ServiceData & { id: string };
 

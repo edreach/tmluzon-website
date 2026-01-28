@@ -8,6 +8,8 @@ export default function NewServicePage() {
       name: '',
       description: '',
       imageUrls: [],
+      price: 0,
+      showPrice: true,
   }
 
   return (
