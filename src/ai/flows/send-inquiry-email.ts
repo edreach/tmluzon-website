@@ -4,7 +4,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import * as nodemailer from 'nodemailer';
 import type { InquiryData, SiteSettings } from '@/lib/types';
 import { adminDb } from '@/firebase/server';
@@ -35,10 +35,13 @@ const sendInquiryEmailFlow = ai.defineFlow(
     outputSchema: SendInquiryEmailOutputSchema,
   },
   async inquiry => {
+    console.log('Starting sendInquiryEmailFlow...');
+
     // 1. Fetch notification settings from Firestore
     const settingsDocRef = adminDb.doc('admin/dashboard/settings/tmluzon');
     let notifySettings;
     try {
+        console.log('Fetching notification settings from Firestore...');
         const settingsDoc = await settingsDocRef.get();
         if (!settingsDoc.exists) {
             console.error('Site settings document not found. Cannot send inquiry email.');
@@ -46,6 +49,8 @@ const sendInquiryEmailFlow = ai.defineFlow(
         }
         const settings = settingsDoc.data() as SiteSettings;
         notifySettings = settings.notificationSettings;
+        console.log(`Settings found. Recipients: ${notifySettings?.recipients?.join(', ')}, Host: ${notifySettings?.smtpHost}`);
+
     } catch (error) {
         console.error("Error fetching site settings:", error);
         return { message: 'Could not fetch notification settings.' };
@@ -58,7 +63,7 @@ const sendInquiryEmailFlow = ai.defineFlow(
     }
     
     if (!notifySettings.smtpHost || !notifySettings.smtpPort || !notifySettings.smtpUser || !notifySettings.smtpPass) {
-        console.error("SMTP configuration is missing in site settings. Cannot send email.");
+        console.error("SMTP configuration is missing or incomplete in site settings. Cannot send email.");
         return { message: 'SMTP not configured in settings.' };
     }
 
@@ -90,7 +95,7 @@ const sendInquiryEmailFlow = ai.defineFlow(
 
     // 4. Define Email content
     const mailOptions = {
-      from: `"TMLUZON Website" <${notifySettings.smtpUser}>`,
+      from: notifySettings.smtpUser,
       to: notifySettings.recipients.join(','),
       subject: 'New Customer Inquiry Received',
       html: `
@@ -126,15 +131,16 @@ const sendInquiryEmailFlow = ai.defineFlow(
       `,
     };
 
+    console.log(`Attempting to send email to: ${mailOptions.to}`);
     // 5. Send email
     try {
       await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully.');
       return { message: 'Email sent successfully.' };
     } catch (error) {
-      console.error('Error sending email:', error);
-      // Don't throw to the client, just log it.
+      console.error('Error sending email via nodemailer:', error);
       // The main inquiry submission should not fail because of the email.
-      return { message: 'Failed to send email.' };
+      return { message: `Failed to send email. Nodemailer error: ${(error as Error).message}` };
     }
   }
 );
