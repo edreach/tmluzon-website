@@ -1,35 +1,13 @@
-"use client";
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Download } from "lucide-react";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection } from "firebase/firestore";
-import type { PricelistFile, PricelistData } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { getPricelists } from "@/lib/data-server";
 
-export default function PricelistPage() {
-  const firestore = useFirestore();
-  const pricelistsQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, "pricelists") : null),
-    [firestore]
-  );
-  const { data: pricelists, isLoading } = useCollection<PricelistData>(pricelistsQuery);
 
-  const pricelistGroups = React.useMemo(() => {
-    if (!pricelists) return [];
-    const groups: { brand: string; files: PricelistFile[] }[] = [];
-    pricelists.forEach((file) => {
-      let group = groups.find((g) => g.brand === file.brand);
-      if (!group) {
-        group = { brand: file.brand, files: [] };
-        groups.push(group);
-      }
-      group.files.push(file as PricelistFile);
-    });
-    return groups.sort((a,b) => a.brand.localeCompare(b.brand));
-  }, [pricelists]);
+export default async function PricelistPage() {
+  const pricelistGroups = await getPricelists();
 
   return (
     <div className="bg-background text-foreground">
@@ -44,33 +22,7 @@ export default function PricelistPage() {
         </div>
 
         <div className="space-y-8">
-          {isLoading &&
-            Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <CardTitle>
-                    <Skeleton className="h-8 w-48" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-4 p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Skeleton className="h-6 w-6" />
-                        <div>
-                          <Skeleton className="h-5 w-64 mb-2" />
-                          <Skeleton className="h-4 w-48" />
-                        </div>
-                      </div>
-                      <Skeleton className="h-10 w-28" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-          {!isLoading &&
-            pricelistGroups.map((group) => (
+          {pricelistGroups.map((group) => (
               <Card key={group.brand}>
                 <CardHeader>
                   <CardTitle className="text-2xl">{group.brand}</CardTitle>
@@ -107,7 +59,7 @@ export default function PricelistPage() {
               </Card>
             ))}
 
-            {!isLoading && pricelistGroups.length === 0 && (
+            {pricelistGroups.length === 0 && (
                 <Card>
                     <CardContent className="p-10 text-center text-muted-foreground">
                         No pricelists have been uploaded yet.
@@ -119,3 +71,4 @@ export default function PricelistPage() {
     </div>
   );
 }
+

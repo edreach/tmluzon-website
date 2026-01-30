@@ -1,4 +1,3 @@
-'use client';
 
 import Image from "next/image";
 import Link from "next/link";
@@ -12,34 +11,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
-import type { Product, ProductData, Service, ServiceData, NewsArticleData } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import type { Product, Service, NewsArticleData } from '@/lib/types';
 import { format } from 'date-fns';
+import { getProducts, getServices, getNews } from '@/lib/data-server';
 
-export default function Home() {
-  const firestore = useFirestore();
+export default async function Home() {
 
-  const productsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), where('discontinued', '!=', true)) : null),
-    [firestore]
-  );
-  const { data: productListings, isLoading: isLoadingProducts } = useCollection<ProductData>(productsQuery);
-
-  const servicesQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'services'), limit(3)) : null),
-    [firestore]
-  );
-  const { data: services, isLoading: isLoadingServices } = useCollection<ServiceData>(servicesQuery);
-
-  const newsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'news'), orderBy('date', 'desc'), limit(3)) : null),
-    [firestore]
-  );
-  const { data: newsItems, isLoading: isLoadingNews } = useCollection<NewsArticleData>(newsQuery);
-
-  const isLoading = isLoadingProducts || isLoadingServices || isLoadingNews;
+  const [productListings, services, newsItems] = await Promise.all([
+    getProducts({ limit: 8 }),
+    getServices({ limit: 3 }),
+    getNews({ limit: 3 })
+  ]);
 
   const latestNews = newsItems?.[0];
   const secondNews = newsItems?.[1];
@@ -76,43 +58,28 @@ export default function Home() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {isLoadingServices ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden rounded-xl shadow-lg">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full mt-2" />
-                  <Skeleton className="h-4 w-2/3 mt-2" />
-                   <Skeleton className="h-10 w-full mt-4" />
-                </div>
-              </Card>
-            ))
-          ) : (
-            services?.map((service: Service) => (
-              <Card key={service.id} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl flex flex-col">
-                <div className="relative w-full h-48 bg-muted">
-                  <Image
-                    src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/600/400`}
-                    alt={service.name}
-                    fill
-                    className="object-cover"
-                    data-ai-hint="service technician"
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-lg font-bold h-14">{service.name}</h3>
-                  <p className="text-muted-foreground text-sm h-24 overflow-hidden">
-                    {service.description.split('.')[0]}. ...
-                  </p>
-                  <Button asChild className="w-full mt-auto">
-                    <Link href={`/services/${service.id}`}>View Details</Link>
-                  </Button>
-                </div>
-              </Card>
-            ))
-          )}
+          {services?.map((service: Service) => (
+            <Card key={service.id} className="overflow-hidden rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl flex flex-col">
+              <div className="relative w-full h-48 bg-muted">
+                <Image
+                  src={service.imageUrls?.[0] || `https://picsum.photos/seed/${service.id}/600/400`}
+                  alt={service.name}
+                  fill
+                  className="object-cover"
+                  data-ai-hint="service technician"
+                />
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-lg font-bold h-14">{service.name}</h3>
+                <p className="text-muted-foreground text-sm h-24 overflow-hidden">
+                  {service.description.split('.')[0]}. ...
+                </p>
+                <Button asChild className="w-full mt-auto">
+                  <Link href={`/services/${service.id}`}>View Details</Link>
+                </Button>
+              </div>
+            </Card>
+          ))}
         </div>
 
         <div className="mt-16 text-center">
@@ -161,23 +128,7 @@ export default function Home() {
               className="w-full max-w-6xl mx-auto"
             >
               <CarouselContent>
-                {isLoadingProducts ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <CarouselItem key={i} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                      <div className="p-1 h-full">
-                        <Card className="overflow-hidden flex flex-col h-full">
-                          <Skeleton className="h-48 w-full" />
-                          <CardContent className="p-4 text-center flex flex-col flex-grow">
-                            <Skeleton className="h-4 w-3/4 mx-auto mb-2" />
-                            <Skeleton className="h-3 w-1/2 mx-auto" />
-                            <Skeleton className="h-9 w-24 mx-auto mt-4" />
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </CarouselItem>
-                  ))
-                ) : (
-                  (productListings as Product[] || []).slice(0, 8).map((product) => (
+                  {productListings.map((product) => (
                     <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                       <div className="p-1 h-full">
                         <Card className="overflow-hidden flex flex-col h-full">
@@ -200,8 +151,7 @@ export default function Home() {
                         </Card>
                       </div>
                     </CarouselItem>
-                  ))
-                )}
+                  ))}
               </CarouselContent>
               <CarouselPrevious className="-left-4 md:-left-12" />
               <CarouselNext className="-right-4 md:-right-12" />
@@ -225,16 +175,7 @@ export default function Home() {
             </div>
             <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column */}
-                {isLoading && (
-                <>
-                    <Skeleton className="lg:col-span-2 rounded-xl h-[450px]" />
-                    <div className="flex flex-col gap-8">
-                    <Skeleton className="rounded-xl flex-1 h-[209px]" />
-                    <Skeleton className="rounded-xl flex-1 h-[209px]" />
-                    </div>
-                </>
-                )}
-                {!isLoading && latestNews && (
+                {latestNews ? (
                 <Link href={`/news/${latestNews.id}`} className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] group">
                     <Image src={latestNews.imageUrls?.[0] || "https://picsum.photos/seed/news1/1200/900"} alt={latestNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={latestNews.imageHint || 'news article'} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -244,8 +185,7 @@ export default function Home() {
                         <Button className="mt-4 w-fit">Read More</Button>
                     </div>
                 </Link>
-                )}
-                {!isLoading && !latestNews && (
+                ) : (
                     <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-lg h-[450px] bg-muted flex items-center justify-center">
                         <p className="text-muted-foreground">No recent news.</p>
                     </div>
@@ -254,7 +194,7 @@ export default function Home() {
 
                 {/* Right Column */}
                 <div className="flex flex-col gap-8">
-                    {!isLoading && secondNews && (
+                    {secondNews ? (
                     <Link href={`/news/${secondNews.id}`} className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
                         <Image src={secondNews.imageUrls?.[0] || "https://picsum.photos/seed/news2/600/400"} alt={secondNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={secondNews.imageHint || 'news article'} />
                         <div className="absolute inset-0 bg-black/40" />
@@ -262,8 +202,12 @@ export default function Home() {
                             <h3 className="text-2xl font-bold">{secondNews.title}</h3>
                         </div>
                     </Link>
+                    ) : (
+                       <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted flex items-center justify-center">
+                        <p className="text-muted-foreground text-sm">No other news.</p>
+                        </div>
                     )}
-                    {!isLoading && thirdNews && (
+                    {thirdNews ? (
                     <Link href={`/news/${thirdNews.id}`} className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] group">
                         <Image src={thirdNews.imageUrls?.[0] || "https://picsum.photos/seed/news3/600/400"} alt={thirdNews.title} fill className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-300" data-ai-hint={thirdNews.imageHint || 'news article'} />
                         <div className="absolute inset-0 bg-black/40" />
@@ -271,11 +215,8 @@ export default function Home() {
                             <h3 className="text-2xl font-bold">{thirdNews.title}</h3>
                         </div>
                     </Link>
-                    )}
-                    {!isLoading && !secondNews && (
-                        <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted flex items-center justify-center">
-                        <p className="text-muted-foreground text-sm">No other news.</p>
-                        </div>
+                    ) : (
+                      !secondNews &&  <div className="relative rounded-xl overflow-hidden shadow-lg flex-1 h-[209px] bg-muted" />
                     )}
                 </div>
             </div>
@@ -285,3 +226,4 @@ export default function Home() {
     </div>
   );
 }
+

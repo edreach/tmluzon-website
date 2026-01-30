@@ -1,12 +1,7 @@
-'use client';
 
-import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, query, orderBy } from 'firebase/firestore';
-import type { SiteSettings, Brand, BrandData } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import { getSiteSettings, getBrands } from '@/lib/data-server';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import Link from 'next/link';
 
 const defaultContent = {
   intro_p1:
@@ -35,46 +30,14 @@ const defaultContent = {
     'To build long term relationships with our customers and clients and provide exceptional customer services by pursuing business through innovative services with advanced technology for the industry.',
 };
 
-export default function AboutPage() {
-  const firestore = useFirestore();
+export default async function AboutPage() {
   
-  const settingsRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'admin/dashboard/settings/tmluzon') : null),
-    [firestore]
-  );
-  const { data: siteSettings, isLoading: isLoadingSettings } = useDoc<SiteSettings>(settingsRef);
-  
-  const brandsQuery = useMemoFirebase(
-      () => (firestore ? query(collection(firestore, 'brands'), orderBy('sortOrder')) : null),
-      [firestore]
-  );
-  const { data: brands, isLoading: isLoadingBrands } = useCollection<BrandData>(brandsQuery);
+  const [siteSettings, brands] = await Promise.all([
+    getSiteSettings(),
+    getBrands()
+  ]);
 
   const content = siteSettings?.aboutUsContent || defaultContent;
-  const isLoading = isLoadingSettings || isLoadingBrands;
-
-
-  if (isLoading) {
-      return (
-        <div className="bg-background text-foreground">
-          <div className="container mx-auto px-4 py-16 sm:py-24 max-w-5xl">
-            <div className="max-w-4xl mx-auto text-center">
-                <Skeleton className="h-12 w-3/4 mx-auto" />
-                <Skeleton className="h-6 w-1/2 mx-auto mt-4" />
-                <div className="mt-8 space-y-6 text-left">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                </div>
-            </div>
-            <Separator className="my-16" />
-             <div className="max-w-4xl mx-auto text-left">
-                <Skeleton className="h-40 w-full" />
-             </div>
-          </div>
-        </div>
-      )
-  }
 
   return (
     <div className="bg-background text-foreground">
@@ -167,7 +130,7 @@ export default function AboutPage() {
                   )}
                 </div>
               ))}
-              {!brands?.length && !isLoading && (
+              {!brands?.length && (
                   <p className="col-span-3 text-center text-muted-foreground">No brands have been added yet.</p>
               )}
             </div>

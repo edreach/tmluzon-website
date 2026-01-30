@@ -1,21 +1,13 @@
-'use client';
 
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, orderBy, query } from 'firebase/firestore';
-import type { NewsArticle, NewsArticleData } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import type { NewsArticleData } from '@/lib/types';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { getNews } from '@/lib/data-server';
 
-export default function NewsPage() {
-  const firestore = useFirestore();
-  const newsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'news'), orderBy('date', 'desc')) : null),
-    [firestore]
-  );
-  const { data: newsItems, isLoading } = useCollection<NewsArticleData>(newsQuery);
+export default async function NewsPage() {
+  const newsItems = await getNews();
 
   return (
     <div className="bg-background text-foreground">
@@ -30,21 +22,7 @@ export default function NewsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {isLoading && (
-            Array.from({length: 6}).map((_, index) => (
-                <Card key={index} className="overflow-hidden rounded-lg shadow-sm flex flex-col">
-                    <Skeleton className="h-48 w-full"/>
-                    <CardContent className="p-6 flex flex-col flex-grow">
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2 mt-2" />
-                        <Skeleton className="h-4 w-full mt-4" />
-                        <Skeleton className="h-4 w-full mt-2" />
-                    </CardContent>
-                </Card>
-            ))
-          )}
-
-          {!isLoading && newsItems?.map((item) => (
+          {newsItems?.map((item: NewsArticleData & { id: string }) => (
             <Link href={`/news/${item.id}`} key={item.id} className="block">
               <Card className="overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
                 <div className="relative w-full h-48 bg-muted">
@@ -71,7 +49,7 @@ export default function NewsPage() {
             </Link>
           ))}
 
-          {!isLoading && newsItems?.length === 0 && (
+          {newsItems?.length === 0 && (
             <p className='text-center text-muted-foreground md:col-span-2 lg:col-span-3'>
                 No news articles have been posted yet.
             </p>
